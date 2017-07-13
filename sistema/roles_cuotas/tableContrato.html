@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" id="pagesheet" />
+
+    <!--angular-->
+
+    <style>
+        .selected {
+            background-color: #808080;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+    <script src="angular-1.4.6/angular.js"></script>
+    <script src="angular-1.4.6/ngStorage.min.js"></script>
+    <script src="angular-1.4.6/angular-route.js"></script>
+    <script src="bower_components/angularUtils-pagination/dirPagination.js"></script>
+    <script src="app.js"></script>
+    <script src="controllers/contratoModify.js"></script>
+
+
+
+
+</head>
+<body ng-app="myApp" ng-controller="ModifyController" ng-init="loadContratos()">
+
+    <script src="scripts/jquery.js" type="text/javascript"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/bootstrap-datepicker.js"></script>
+    <script src="scripts/jsboostrapDatePickerEs.js" charset="UTF-8"></script>
+
+
+
+
+    <script>
+
+
+        $(function () {
+
+
+
+
+            $('.datepicker').datepicker({
+                multidate: true,
+                language: 'es',
+            });
+
+
+
+            $('.datepicker').datepicker('setDates', [])
+
+        });
+
+    /*$("#datepicker").change("dp.change", function() {
+     console.log('entra1');
+     $scope.historiaClinica.fecha_examen = $("datepicker").val();
+     alert("selected date is " + $scope.historiaClinica.fecha_examen);
+
+     });*/
+
+
+    </script>
+
+
+    <form>
+        <panel class="hidden-print">
+
+            <div class="panel-header ">
+                <h1 class="text-center pane-title">Modificar Contratos</h1>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <br />
+                    <br />
+                    <div class="col-md-12 col-xs-12">
+                        <h4>Buscar:</h4><br />
+                        <div class="col-md-12 col-xs-12">
+                            <input type="text" class="form-control hidden-print" ng-model="cedula" placeholder="busqueda" /><br />
+                        </div>
+                        <div class="col-md-0 col-xs-0">
+
+                            <!--<input type="submit" class="form-control btn-primary hidden-print" value="Buscar" ng-click="loadContratos()" /><br />-->
+                        </div>
+                        <br />
+                        <br /><br />
+                        <br />
+
+                    </div>
+
+
+                    <div class="col-md-12 col-xs-12">
+                        <table class="table table-hover">
+
+
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Codigo</th>
+                                    <th>Cedula</th>
+                                    <th>Nombre</th>
+                                    <th>Fecha Contrato</th>
+                                    <th>Plazo Credito</th>
+                                    <th>Estado</th>
+                                    <th>Costo Cuota</th>
+                                    <th>Interes Credito</th>
+                                    <th>Interes Mora</th>
+                                    <th>Cuota Inicial</th>
+                                </tr>
+
+
+
+
+                            </thead>
+                            <tbody>
+
+                                <tr dir-paginate="item in listaContratos | itemsPerPage:7 | filter:cedula" ng-class="{'selected':$index == selectedRow}" ng-click="setClickedRow($index,item)">
+
+                                    <td>{{$index}}</td>
+                                    <td>{{ item.codigo}}</td>
+                                    <td>{{ item.ci_ruc}}</td>
+                                    <td>{{ item.nombre}}</td>
+                                    <td>{{ item.confechacontrato }}</td>
+                                    <td>{{ item.conplazocredito }}</td>
+                                    <td>{{ item.estconcodigo }}</td>
+                                    <td>{{ item.concostocuota }}</td>
+                                    <td>{{ item.coninterescredito }}</td>
+                                    <td>{{ item.coninteresmora }}</td>
+                                    <td>{{ item.concuotainicial }}</td>
+
+
+                                </tr>
+                                <dir-pagination-controls></dir-pagination-controls> <!--agregar botones paginacion-->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-3 col-xs-12">
+                        <br />
+                        <br />
+                        <input class="form-control btn-primary hidden-print" type="submit" value="Modificar" ng-click="redirect()" /><br>
+                    </div>
+                </div>
+
+
+       </div>
+
+
+
+
+        </panel>
+    </form>
+
+
+
+
+
+
+    <script>
+      function printDiv() {
+          var divToPrint = document.getElementById('areaToPrint');
+          window.print();
+      }
+    </script>
+
+
+</body>
+</html>

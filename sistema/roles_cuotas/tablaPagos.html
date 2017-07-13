@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" id="pagesheet" />
+ 
+    <!--angular-->
+
+    <style>
+        .selected {
+            background-color: #808080;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+    <script src="angular-1.4.6/angular.js"></script>
+    <script src="angular-1.4.6/ngStorage.min.js"></script>
+    <script src="angular-1.4.6/angular-route.js"></script>
+    <script src="bower_components/angularUtils-pagination/dirPagination.js"></script>
+    <script src="scripts/jspdf.min.js"></script>
+    <script src="app.js"></script>
+    <script src="controllers/pagosController.js"></script>
+
+
+
+
+</head>
+<body ng-app="myApp" ng-controller="PagosController" ng-init="iniciar()">
+
+    <script src="scripts/jquery.js" type="text/javascript"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/bootstrap-datepicker.js"></script>
+    <script src="scripts/jsboostrapDatePickerEs.js" charset="UTF-8"></script>
+
+
+
+
+    <script>
+
+
+        $(function () {
+
+
+
+
+            $('.datepicker').datepicker({
+                multidate: true,
+                language: 'es',
+            });
+
+
+
+            $('.datepicker').datepicker('setDates', [])
+
+        });
+
+    /*$("#datepicker").change("dp.change", function() {
+     console.log('entra1');
+     $scope.historiaClinica.fecha_examen = $("datepicker").val();
+     alert("selected date is " + $scope.historiaClinica.fecha_examen);
+
+     });*/
+
+
+    </script>
+
+
+    <form>
+        <panel class="hidden-print">
+
+            <div class="panel-header ">
+                <h1 class="text-center pane-title">Cobros</h1>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <br />
+                    <br />
+                    <div class="col-md-12 col-xs-12">
+                        <h4>Buscar:</h4><br />
+                        <div class="col-md-12 col-xs-12">
+                            <input type="text" class="form-control hidden-print" ng-model="cedula" placeholder="busqueda" /><br />
+                            </div>
+                       
+                            <br />
+                            <br /><br />
+                            <br />
+
+                        </div>
+                   
+
+                        <div class="col-md-12 col-xs-12">
+                            <table class="table table-hover">
+
+
+
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Codigo</th>
+                                        <th>Nombre</th>
+                                        <th>Cedula</th>
+                                        <th>Fecha Contrato</th>
+                                        <th>Plazo Credito</th>
+                                        <th>Estado</th>
+                                        <th>Costo Cuota</th>
+                                        <th>Interes Credito</th>
+                                        <th>Interes Mora</th>
+                                        <th>Cuota Inicial</th>
+                                        <th>Productos</th>
+                                    </tr>
+
+
+                                  
+
+                                </thead>
+                                <tbody>
+
+                                    <tr dir-paginate="item in listaContratos | filter: cedula| itemsPerPage:7 track by $index "  ng-class="{'selected':$index == selectedRow}" ng-click="setClickedRow($index,item)">
+
+                                        <td>{{$index}}</td>
+                                        <td>{{ item.codigo}}</td>
+                                        <td>{{ item.nombre}}</td>
+                                        <td>{{ item.ci_ruc}}</td>
+                                        <td>{{ item.confechacontrato }}</td>
+                                        <td>{{ item.conplazocredito }}</td>
+                                        <td>{{ item.estconcodigo }}</td>
+                                        <td>{{ item.concostocuota }}</td>
+                                        <td>{{ item.coninterescredito }}</td>
+                                        <td>{{ item.coninteresmora }}</td>
+                                        <td>{{ item.concuotainicial }}</td>
+                                        <td>{{ item.producto }}</td>
+
+                                    </tr>
+                                    <dir-pagination-controls></dir-pagination-controls> <!--agregar botones paginacion-->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-3 col-xs-12">
+                            <br />
+                            <br />
+                            <input class="form-control btn-primary hidden-print" type="submit" value="Cargar Pagos" ng-click="loadPagos()" /><br>
+                        </div>
+                    </div>
+
+
+
+                <div class="row">
+                    <br />
+                    <br />
+                    <div class="col-md-12 col-xs-12">
+
+                        <h4 class="pane-title">Coutas Por Cobrar</h4>
+                        
+                        <table class="table table-hover">
+
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Descripcion Pago</th>
+                                    <th>Fecha Maxima</th>
+                                    <th>Valor</th>
+                    
+                                    
+
+                                </tr>
+
+
+
+
+                            </thead>
+                            <tbody>
+
+                                <tr dir-paginate="item in listaPagosPendiente | itemsPerPage:7" ng-class="{'selected':$index == selectedRow2}" ng-click="setClickedRow2($index,item)">
+
+                                    <td>{{$index}}</td>
+                                    <td>{{ item. descripcion_pago}}</td>
+                                    <td>{{ item.fecha_maxima }}</td>
+                                    <td>{{ item.valor   }}</td>
+                                  
+                                    
+
+                                </tr>
+                                <dir-pagination-controls></dir-pagination-controls> <!--agregar botones paginacion-->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-3 col-xs-12">
+                        <br />
+                        <br />
+                        <input class="form-control btn-primary hidden-print" type="submit" value="Realizar Pago" data-toggle="modal" data-target="#myModal" ng-click="calcular()"/><br>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" role="dialog">
+                            <div class="modal-dialog">
+
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Realizar Pago</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label>Descripcion Pago</label>
+                                                <input type="text"class="form-control" readonly ng-model="pagar.descripcion_pago" />
+                                                <label>Fecha maxima</label>
+                                                <input type="text" class="form-control" readonly ng-model="pagar.fecha_maxima" />
+                                                <label>Valor a Pagar</label>
+                                                <input type="text" class="form-control"  ng-model="pagar.valor" />
+                                                <label>Fecha Actual</label>
+                                                <input type="text" class="form-control" readonly ng-model="dateNow" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="pago()">Pagar</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                <div class="row">
+                    <br />
+                    <br />
+                    <div class="col-md-12 col-xs-12">
+
+                        <h4 class="pane-title">Coutas Cobradas</h4>
+
+                        <table class="table table-hover">
+
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Descripcion Pago</th>
+                                    <th>Fecha Maxima</th>
+                                    <th>Valor</th>
+                                    <th>Fecha Pago</th>
+
+
+                                </tr>
+
+
+
+
+                            </thead>
+                            <tbody>
+
+                                <tr dir-paginate="item in listaPagosRealizados | itemsPerPage:7" ng-class="{'selected':$index == selectedRow3}" ng-click="setClickedRow3($index,item)">
+
+                                    <td>{{$index}}</td>
+                                    <td>{{ item. descripcion_pago}}</td>
+                                    <td>{{ item.fecha_maxima }}</td>
+                                    <td>{{ item.valor   }}</td>
+                                    <td>{{ item.fecha_pago   }}</td>
+
+
+
+                                </tr>
+                                <dir-pagination-controls></dir-pagination-controls> <!--agregar botones paginacion-->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-3 col-xs-12">
+                        <br />
+                        <br />
+                        <input class="form-control btn-primary hidden-print" type="submit" value="Modificar" data-toggle="modal" data-target="#myModal2" /><br>
+
+                      
+
+                    </div>
+                    <div class="col-md-3 col-xs-12">
+                        <br />
+                        <br />
+                        <input class="form-control btn-primary hidden-print" type="submit" value="Imprimir" ng-click="imprimir()" /><br>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal2" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Realizar Pago</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" readonly ng-model="pagar1.descripcion_pago" />
+                                            <input type="text" class="form-control"readonly  ng-model="pagar1.fecha_maxima" />
+                                            <input type="text" class="form-control"readonly  ng-model="pagar1.valor" />
+                                            <input type="text" class="form-control" readonly ng-model="pagar1.fecha_pago" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="modificar()">Cancelar Pago</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+            </div>
+
+           
+
+
+        </panel>
+    </form>
+
+   
+
+
+
+
+    <script>
+      function printDiv() {
+          var divToPrint = document.getElementById('areaToPrint');
+          window.print();
+      }
+    </script>
+
+
+</body>
+</html>

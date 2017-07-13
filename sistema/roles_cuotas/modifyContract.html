@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" id="pagesheet" />
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css" id="pageshee3" />
+    <!--angular-->
+
+    <script src="angular-1.4.6/angular.js"></script>
+    <script src="angular-1.4.6/ngStorage.min.js"></script>
+    <script src="angular-1.4.6/angular-route.js"></script>
+    <script src="bower_components/angularUtils-pagination/dirPagination.js"></script>
+    <script src="app.js"></script>
+    <script src="controllers/contratoModificacion.js"></script>
+
+
+
+
+</head>
+<body ng-app="myApp" ng-controller="contratoMod" ng-init="iniciar()">
+
+    <script src="scripts/jquery-1.11.3.min.js" type="text/javascript"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>-->
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/bootstrap-datepicker.js"></script>
+    <script src="scripts/jsboostrapDatePickerEs.js" charset="UTF-8"></script>
+    <!--<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js"></script>-->
+
+
+
+    <script>
+
+
+        $(function () {
+
+
+
+
+            $('.datepicker').datepicker({
+
+                language: 'es',
+            });
+
+
+
+            $('.datepicker').datepicker('setDates', [])
+
+        });
+
+    /*$("#datepicker").change("dp.change", function() {
+     console.log('entra1');
+     $scope.historiaClinica.fecha_examen = $("datepicker").val();
+     alert("selected date is " + $scope.historiaClinica.fecha_examen);
+
+     });*/
+
+
+    </script>
+
+
+    <form>
+        <panel class="panel-primary">
+
+            <div class="panel-header ">
+                <h1 class="text-center pane-title">Contrato</h1>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <h4 class="pane-title">Informacion Venta Contrato</h4>
+
+                 
+                    <div class="col-md-12 col-xs-12">
+
+                        <div class="col-md-2 col-xs-6">
+
+                            <label>Entrada Pendiente</label>
+                        </div>
+
+
+                        <div class="col-md-5 col-xs-6">
+
+                            <label>
+                                <input type="radio" ng-model="obj.conentradapendiente" value="SI">
+                                SI
+                            </label>
+                        </div>
+                        <div class="col-md-5 col-xs-6">
+                            <label>
+                                <input type="radio" ng-model="obj.conentradapendiente" value="NO">
+                                NO
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12">
+
+                    </div>
+
+
+                    <div class="col-md-12 col-xs-12">
+
+                        <h4 class="pane-title">Informacion Cliente</h4>
+
+                    </div>
+
+
+                    <div class="col-md-12 col-xs-12">
+                        <div class="col-md-2 col-xs-6">
+
+                            <label>Casa</label>
+                        </div>
+
+
+                        <div class="col-md-5 col-xs-6">
+
+                            <label>
+                                <input type="radio" ng-model="obj.concasapropiaarrendadacliente" value="propia">
+                                PROPIA
+                            </label>
+                        </div>
+                        <div class="col-md-5 col-xs-6">
+
+                            <label>
+                                <input type="radio" ng-model="obj.concasapropiaarrendadacliente" value="arrienda">
+                                ARRENDADA
+                            </label>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-10 col-xs-12">
+                        <label>Caracteristicas Domicilio</label>
+                        <input type="text" class="form-control" ng-model="obj.concaracteristicasdomiciliocliente" />
+                        <label>Referencias </label>
+                        <input type="text" class="form-control" ng-model="obj.conreferenciadomiciliocliente" />
+                    </div>
+                    <div class="col-md-2 col-xs-12">
+                        <label>Telefono Casa</label>
+                        <input type="text" class="form-control" ng-model="obj.contelefonodomiciliocliente" />
+                        <label>Telefono Celular</label>
+                        <input type="text" class="form-control" ng-model="obj.concelularcliente" />
+                    </div>
+
+
+
+                    <div class="col-md-12 col-xs-12">
+                        <h4 class="pane-title">Informacion Cliente Trabajo</h4>
+                        <div class="col-md-10 col-xs-12">
+                            <label>Trabajo</label>
+                            <input type="text" class="form-control" ng-model="obj.conlugartrabajocliente" />
+                            <label>Cargo</label>
+                            <input type="text" class="form-control" ng-model="obj.concargotrabajocliente" />
+                        </div>
+                        <div class="col-md-2 col-xs-12">
+
+                            <label>Tiempo</label>
+                            <input type="text" class="form-control" ng-model="obj.contiempolugartrabajocliente" />
+                            <label>Telefono </label>
+                            <input type="text" class="form-control" ng-model="obj.conreferencialugartrabajocliente" />
+
+                        </div>
+                        <div class="col-md-12 col-xs-12">
+                            <label>Referencias </label>
+                            <input type="text" class="form-control" ng-model="obj.contelefonostrabajocliente" />
+                            <label>Direccion</label>
+                            <input type="text" class="form-control" ng-model="obj.condirecciontrabajocliente" />
+                        </div>
+
+
+
+
+                    </div>
+                    <div class="col-md-12 col-xs-12">
+                        <h4 class="pane-title">Informacion Garante y/o Conyugue</h4>
+                        <div class="col-md-4 col-xs-12">
+                            <label>Cedula</label>
+                            <input type="text" class="form-control" ng-model="obj.concedulagaranteconyugue" />
+
+                        </div>
+                        <div class="col-md-4 col-xs-12">
+                            <label>Ciudad</label>
+                            <input type="text" class="form-control" ng-model="obj.conciudadgaranteconyugue" />
+
+                        </div>
+                        <div class="col-md-10 col-xs-12">
+                            <label>Nombres Completos</label>
+                            <input type="text" class="form-control" ng-model="obj.connombrescompletosgaranteconyugue" />
+                            <label>Direccion</label>
+                            <input type="text" class="form-control" ng-model="obj.condirecciondomiciliogaranteconyugue" />
+                        </div>
+                        <div class="col-md-2 col-xs-12">
+                            <label>Telefono Casa</label>
+                            <input type="text" class="form-control" ng-model="obj.contelefonocasagaranteconyugue" />
+                            <label>Telefono Celular </label>
+                            <input type="text" class="form-control" ng-model="obj.concelulargaranteconyugue" />
+                        </div>
+                        <div class="col-md-12 col-xs-12">
+
+
+                            <label>Caracteristicas Domicilio</label>
+                            <input type="text" class="form-control" ng-model="obj.concaracteristicasdomiciliogaranteconyugue" />
+
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="col-md-12 col-xs-12">
+                        <div class="col-md-2 col-xs-6">
+
+                            <label>Casa</label>
+                        </div>
+
+
+                        <div class="col-md-5 col-xs-6">
+
+                            <label>
+                                <input type="radio" ng-model="obj.concasapropiaarrendadagaranteconyugue" value="propia">
+                                PROPIA
+                            </label>
+                        </div>
+                        <div class="col-md-5 col-xs-6">
+
+                            <label>
+                                <input type="radio" ng-model="obj.concasapropiaarrendadagaranteconyugue" value="arrienda">
+                                ARRENDADA
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-xs-12">
+
+                        <div class="col-md-12 col-xs-12">
+                            <label>Referencias </label>
+                            <input type="text" class="form-control" ng-model="obj.conreferenciadomiciliogaranteconyugue" />
+
+
+                        </div>
+
+
+
+                        <div class="col-md-12 col-xs-12">
+                            <h4 class="pane-title">Informacion Garante y/o Conyugue Trabajo</h4>
+                            <div class="col-md-10 col-xs-12">
+                                <label>Trabajo</label>
+                                <input type="text" class="form-control" ng-model="obj.conlugartrabajogaranteconyugue" />
+                                <label>Cargo</label>
+                                <input type="text" class="form-control" ng-model="obj.concargotrabajogaranteconyugue" />
+                            </div>
+                            <div class="col-md-2 col-xs-12">
+                                <label>Tiempo</label>
+                                <input type="text" class="form-control" ng-model="obj.contiempolugartrabajogaranteconyugue" />
+                                <label>Telefono </label>
+                                <input type="text" class="form-control" ng-model="obj.contelefonostrabajogaranteconyugue" />
+
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                                <label>Direccion</label>
+                                <input type="text" class="form-control" ng-model="obj.condirecciontrabajogaranteconyugue" />
+
+                            </div>
+
+
+                        </div>
+                        <br /><br /><br />
+                        <div class="col-md-12 col-xs-12">
+                            <h4 class="pane-title">Informacion Referencia Personal</h4>
+                            <div class="col-md-4 col-xs-12">
+                                <label>Cedula</label>
+                                <input type="text" class="form-control" ng-model="obj.concedulareferenciapersonal" />
+
+                            </div>
+                            <div class="col-md-8 col-xs-12">
+                                <label>Nombres Completos</label>
+                                <input type="text" class="form-control" ng-model="obj.connombrescompletosreferenciapersonal" />
+
+                            </div>
+                            <div class="col-md-10 col-xs-12">
+                                <label>Direccion</label>
+                                <input type="text" class="form-control" ng-model="obj.condirecciondomicilioreferenciapersonal" />
+                                <label>Caracteristicas Domicilio</label>
+                                <input type="text" class="form-control" ng-model="obj.concaracteristicasdomicilioreferenciapersonal" />
+                            </div>
+                            <div class="col-md-2 col-xs-12">
+                                <label>Telefono Casa</label>
+                                <input type="text" class="form-control" ng-model="obj.contelefonocasareferenciapersonal" />
+                                <label>Telefono Celular </label>
+                                <input type="text" class="form-control" ng-model="obj.concelularreferenciapersonal" />
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-md-2 col-xs-6">
+                                <label>Casa</label>
+                            </div>
+
+
+                            <div class="col-md-5 col-xs-6">
+
+                                <label>
+                                    <input type="radio" ng-model="obj.concasapropiaarrendadareferenciapersonal" value="propia">
+                                    PROPIA
+                                </label>
+                            </div>
+                            <div class="col-md-5 col-xs-6">
+
+                                <label>
+                                    <input type="radio" ng-model="obj.concasapropiaarrendadareferenciapersonal" value="arrienda">
+                                    ARRENDADA
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 col-xs-12">
+
+                            <label>Referencias </label>
+                            <input type="text" class="form-control" ng-model="obj.conreferenciadomicilioreferenciapersonal" />
+
+                        </div>
+                        <div class="col-md-12 col-xs-12">
+                            <h4 class="pane-title">Informacion Referencia Personal Trabajo</h4>
+                            <div class="col-md-10 col-xs-12">
+                                <label>Trabajo</label>
+                                <input type="text" class="form-control" ng-model="obj.conlugartrabajoreferenciapersonal" />
+                                <label>Cargo</label>
+                                <input type="text" class="form-control" ng-model="obj.concargotrabajoreferenciapersonal" />
+                            </div>
+                            <div class="col-md-2 col-xs-12">
+
+                                <label>Telefono </label>
+                                <input type="text" class="form-control" ng-model="obj.contelefonostrabajoreferenciapersonal" />
+                                <label>Tiempo</label>
+                                <input type="text" class="form-control" ng-model="obj.contiempolugartrabajoreferenciapersonal" />
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+
+
+                                <label>Direccion</label>
+                                <input type="text" class="form-control" ng-model="obj.condirecciontrabajoreferenciapersonal" />
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="col-md-12 col-xs-12">
+                            <h4 class="pane-title">Informacion Referencia Estudiantil</h4>
+                            <div class="col-md-4 col-xs-12">
+                                <label>Cedula</label>
+                                <input type="text" class="form-control" ng-model="obj.concedulareferenciaestudiantil" />
+                                <label>Nivel </label>
+                                <input type="text" class="form-control" ng-model="obj.connivelreferenciaestudiantil" />
+                            </div>
+                            <div class="col-md-8 col-xs-12">
+                                <label>Nombres Completos</label>
+                                <input type="text" class="form-control" ng-model="obj.connombrescompletosreferenciaestudiantil" />
+                                <label>Parentezco</label>
+                                <input type="text" class="form-control" ng-model="obj.conparentescoreferenciaestudiantil" />
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+
+                                <label>Institucion</label>
+                                <input type="text" class="form-control" ng-model="obj.coninstitucionreferenciaestudiantil" />
+                            </div>
+
+
+
+
+                        </div>
+
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-md-4 col-xs-12">
+                                <br />
+                                <br />
+                                <input type="submit" class="form-control btn-primary" value="Imprimir" ng-click="imprimir()" />
+                                <br />
+                                <br />
+                            </div>
+                            <div class="col-md-4 col-xs-12">
+                                <br />
+                                <br />
+                                <input type="submit" class="form-control btn-primary" value="Guardar" ng-click="guardar()" />
+                            </div>
+                            <div class="col-md-4 col-xs-12">
+                                <br />
+                                <br />
+                                <input type="submit" class="form-control btn-primary" value="Regresar" ng-click="regresar()" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </panel>
+    </form>
+
+
+
+
+</body>
+</html>

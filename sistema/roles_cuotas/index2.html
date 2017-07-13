@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia Clinica</title>
+    <!-----estilos -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" id="pagesheet"/>
+    <link rel="stylesheet" type="text/css" href="css/OverrideComponents.css" id="pageshee1"/>
+    <link rel="stylesheet" type="text/css" href="css/datepicker.css" id="pageshee3"/>
+
+    <!-----angular-->
+
+    <script src="angular-1.4.6/angular.js"></script>
+    <script src="angular-1.4.6/angular-route.js"></script>
+    <script src="angular-1.4.6/ngStorage.min.js"></script>
+    <script src="app.js"></script>
+
+    <script src="controllers/CargasController.js"></script>
+
+
+    <script src="controllers/PacienteController.js"></script>
+
+    <script src="controllers/LoginController.js"></script>
+    <script src="angular-1.4.6/angular-local-storage.min.js"></script>
+
+</head>
+<body ng-app="myApp" ng-controller="test" >
+
+<script src="scripts/jquery-1.11.3.min.js" type="text/javascript"></script>
+<script src="scripts/bootstrap.min.js"></script>
+<script src="scripts/ui-bootstrap-tpls-1.3.2.min.js"></script>
+<script src="scripts/bootstrap-datepicker.js"></script>
+
+
+<script>
+
+
+    $(function(){
+
+
+        $('.datepicker').datepicker();
+
+
+        $('#date').change(function(){
+
+            $scope.historiaClinica.fecha_examen = $("#date").val();
+        });
+      //  console.log('entra');
+
+    });
+
+    /*$("#datepicker").change("dp.change", function() {
+     console.log('entra1');
+     $scope.historiaClinica.fecha_examen = $("datepicker").val();
+     alert("selected date is " + $scope.historiaClinica.fecha_examen);
+
+     });*/
+
+
+</script>
+
+
+<!--<script>
+    $(function() {
+        $(".datepicker").datepicker(
+                {
+                    dateFormat: "dd/mm/yy",
+                    dayNames: [ "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" ],
+                    dayNamesMin: [ "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa" ],
+                    firstDay: 1,
+                    gotoCurrent: true,
+                    monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre" ]
+                }
+        );
+    });
+</script>-->
+
+<!-----menu -->
+<
+<form class="form" role="form" ng-controller="PacienteController" ng-init="load()">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+
+            <h3 class="panel-title" style="text-align: center">Ingreso Paciente </h3>
+
+        </div>
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-md-3 col-xs-12" >
+                    <br>
+                    <label > Cédula:</label>
+                    <input type="text" class="form-control" placeholder="999999999-9" ng-model="paciente.ci" />
+                    <label > Primer Nombre:</label>
+                    <input type="text" class="form-control" placeholder="Primer Nombre" ng-model="paciente.primer_nombre"/>
+                    <label > Segundo Nombre:</label>
+                    <input type="text" class="form-control" placeholder="Segundo Nombre" ng-model="paciente.segundo_nombre"/>
+                    <label > Teléfono:</label>
+                    <input type="text" class="form-control" placeholder="Telefono" ng-model="paciente.telefono"/>
+                </div>
+                <div class="col-md-3 col-xs-12" >
+                    <br>
+                    <label > Primer Apellido:</label>
+                    <input type="text" class="form-control" placeholder="Primer Apellido:" ng-model="paciente.primer_apellido" />
+                    <label > Segundo Apellido:</label>
+                    <input type="text" class="form-control" placeholder="Segundo Apellido" ng-model="paciente.segundo_apellido"/>
+                    <label > Fecha Nacimiento: </label><br>
+                    <input class="datepicker" type="text" id="datepicker1" name="date" /><br>
+
+                </div>
+                <div class="col-md-3 col-xs-12" >
+                    <br>
+                    <label> Sexo: </label>
+                    <select class="form-control" name="singleSelect" ng-model="paciente.sexo" >
+                        <option value="H" >Hombre</option>
+                        <option value="M" >Mujer</option>
+
+                    </select>
+                    <label> Provincia: </label>
+                    <select name="Provimcia" ng-model="provinciaSeleccionada" class="form-control" single
+                             ng-click="buscarCiudadPorProvincia1()">
+                        <option id="valor" value={{empresaAux._id}}
+                                ng-repeat="empresaAux in provincias">
+                            {{empresaAux.nombre_provincia}}
+                        </option>
+                    </select>
+                    <label> Ciudad: </label>
+
+                    <select class="form-control" name="singleSelect" ng-model="paciente.ciudad">
+                        <option  ng-repeat="ci in ciudades" value="{{ci._id}}">{{ci.nombre_ciudad}}</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 col-xs-12" >
+                      <br>
+                    <label > Edad:</label>
+                    <input type="number" class="form-control" placeholder="1" min="1" ng-model="paciente.edad"/>
+
+                    <label> Estado Civil: </label>
+
+                    <select class="form-control" name="singleSelect" ng-model="paciente.estado_civil">
+                    <option ng-repeat="ec in estado_civil" value="{{ec._id}}">{{ec.descripcion_estado_civil}}</option>
+
+                </select>
+                    <label> Nivel Estudio: </label>
+
+                    <select class="form-control" name="singleSelect1" ng-model="paciente.nivel_estudios">
+                        <option ng-repeat="nivel in nivel_estudio" value="{{nivel._id}}">{{nivel.descripcion_nivel_estudio}}</option>
+
+                    </select>
+                </div>
+
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="panel-heading">
+            <br>
+                    <h3 class="panel-title" style="font-weight:bold">INFORMACIÓN OCUPACIONAL CARGO ACTUAL / RETIRADO O A INGRESAR </h3>
+
+                </div>
+                <div class="container" style="border: medium !important;">
+
+
+                    <div class="row">
+
+
+                        <div class="col-md-3 col-xs-12">
+                            <br><br>
+
+                            <label> Empresa: </label>
+                            <select name="Provimcia" ng-model="empresaSeleccionada" class="form-control" single
+                                    ng-click="buscarDependenciaPorEmpresa()">
+                                <option id="valor1" value={{empresaAux1._id}}
+                                        ng-repeat="empresaAux1 in empresas">
+                                    {{empresaAux1.nombre_empresa}}
+                                </option>
+                            </select>
+                            <label> Dependencia: </label>
+
+                            <select class="form-control" name="singleSelect" ng-model="puestoTrabajo.dependencia" ng-click="changePuesto()">
+                                <option  ng-repeat="ci in dependencia" value="{{ci._id}}">{{ci.nombre_dependencia}}</option>
+
+                            </select>
+
+                            <label> Jornada: </label>
+
+                            <select class="form-control" name="singleSelect" ng-model="puestoTrabajo.jornada">
+                                <option  ng-repeat="jo in jornada" value="{{jo._id}}">{{jo.nombre_jornada}}</option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="col-md-3 col-xs-12">
+                            <br><br>
+                            <label> Puesto: </label>
+                            <select class="form-control" name="singleSelect" ng-model="puestoTrabajo.cargo">
+                                <option  ng-repeat="ca in cargo" value="{{ca._id}}">{{ca.nombre_cargo}}</option>
+
+                            </select>
+                            <label > Fecha Cargo: </label><br>
+                            <input class="datepicker" type="text" id="datepicker2" name="date" /><br>
+                            <label>Descripcion Funciones:</label>
+                            <input type="text" class="form-control" placeholder="Descripción Funciones" ng-model="puestoTrabajo.descripcion_funciones"/>
+
+
+                        </div>
+                        <div class="col-md-3 col-xs-12">
+                            <br>
+
+                            <label for="Maquinaria"> Maquinaria: </label><br>
+                            Búsqueda <input type="text" ng-model="search1" class="form-control" placeholder="Busqueda"><br>
+                            <select name="Maquinaria" ng-model="selectedMaquinaria" class="form-control" multiple
+                                    style="height: 150px;" ng-click="selectedMaq()">
+                                <option value={{empresaAux3}}
+                                        ng-repeat="empresaAux3 in maquinaria | filter:search1| orderBy:empresaAux3.nombre_maquinaria">
+                                    {{empresaAux3.nombre_maquinaria}}
+                                </option>
+                            </select><br>
+
+
+
+                        </div>
+                        <div class="col-md-3 col-xs-12">
+                            <br>
+                            <label for="Maquinaria1"> Maquinaria Seleccionada: </label><br>
+                            Búsqueda <input type="text" ng-model="search2" class="form-control" placeholder="Busqueda"><br>
+                            <select name="Maquinaria" ng-model="selectedMaquinaria" class="form-control" multiple
+                                    style="height: 150px;" ng-click="selectedMaq1()">
+                                <option value={{empresaAux4}}
+                                        ng-repeat="empresaAux4 in listaSeleccionMaquinaria | filter:search2| orderBy:empresaAux4.nombre_maquinaria">
+                                    {{empresaAux4.nombre_maquinaria}}
+                                </option>
+                            </select><br>
+
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-3 col-xs-12">
+                                <br>
+
+                                <label for="Herramientas"> Herramientas: </label><br>
+                                Búsqueda <input type="text" ng-model="search3" class="form-control" placeholder="Busqueda"><br>
+                                <select name="Herramientas" ng-model="selectedHerramientas" class="form-control" multiple
+                                        style="height: 150px;" ng-click="selectedHerra()">
+                                    <option value={{empresaAux4}}
+                                            ng-repeat="empresaAux4 in herramientas | filter:search3| orderBy:empresaAux4.nombre_maquinaria">
+                                        {{empresaAux4.nombre_herramienta}}
+                                    </option>
+                                </select><br>
+
+
+
+                            </div>
+                            <div class="col-md-3 col-xs-12">
+                                <br>
+                                <label for="Herramientas2"> Herramientas Seleccionada: </label><br>
+                                Búsqueda <input type="text" ng-model="search4" class="form-control" placeholder="Busqueda"><br>
+                                <select name="Herramientas2" ng-model="selectedHerramientas" class="form-control" multiple
+                                        style="height: 150px;" ng-click="selectedHerra1()">
+                                    <option value={{empresaAux5}}
+                                            ng-repeat="empresaAux5 in listaSeleccionHerramientas | filter:search4| orderBy:empresaAux5.nombre_herramienta">
+                                        {{empresaAux5.nombre_herramienta}}
+                                    </option>
+                                </select><br>
+
+
+                            </div>
+                            <div class="col-md-3 col-xs-12">
+                                <br>
+
+                                <label for="MatPri"> Materia Prima: </label><br>
+                                Búsqueda <input type="text" ng-model="search5" class="form-control" placeholder="Busqueda"><br>
+                                <select name="MatPri" ng-model="selectedMateriaPrima" class="form-control" multiple
+                                        style="height: 150px;" ng-click="selectedMateriaPr()">
+                                    <option value={{empresaAux5}}
+                                            ng-repeat="empresaAux5 in materiaPrima | filter:search5| orderBy:empresaAux5.descripcion_materia_prima">
+                                        {{empresaAux5.descripcion_materia_prima}}
+                                    </option>
+                                </select><br>
+
+
+
+
+                            </div>
+
+                            <div class="col-md-3 col-xs-12">
+                                <br>
+
+                                <label for="MatPriSe"> Materia Prima Seleccionada: </label><br>
+                                Búsqueda <input type="text" ng-model="search6" class="form-control" placeholder="Busqueda"><br>
+                                <select name="MatPriSe" ng-model="selectedMateriaPrima" class="form-control" multiple
+                                        style="height: 150px;" ng-click="selectedMateriaPr1()">
+                                    <option value={{empresaAux6}}
+                                            ng-repeat="empresaAux6 in listaSeleccionMateriaPrima | filter:search6| orderBy:empresaAux6.descripcion_materia_prima">
+                                        {{empresaAux6.descripcion_materia_prima}}
+                                    </option>
+                                </select><br>
+
+                            </div>
+
+
+                        </div>
+
+
+
+
+                        <div class="row">
+
+
+
+
+                                <div class="col-md-3 col-xs-12">
+                                    <br>
+
+                                    <label for="Proteccion"> Protección: </label><br>
+                                    Búsqueda <input type="text" ng-model="search7" class="form-control" placeholder="Busqueda"><br>
+                                    <select name="Proteccion" ng-model="selectedProteccion" class="form-control" multiple
+                                            style="height: 150px;" ng-click="selectedProteccionF()">
+                                        <option value={{empresaAux7}}
+                                                ng-repeat="empresaAux7 in proteccion | filter:search7| orderBy:empresaAux7.nombre_proteccion">
+                                            {{empresaAux7.nombre_proteccion}}
+                                        </option>
+                                    </select><br>
+
+                                </div>
+
+
+
+                            <div class="col-md-3 col-xs-12">
+                                <br>
+
+                                <label for="Proteccion1"> Protección Seleccionada: </label><br>
+                                Búsqueda <input type="text" ng-model="search8" class="form-control" placeholder="Busqueda"><br>
+                                <select name="Proteccion1" ng-model="selectedProteccion" class="form-control" multiple
+                                        style="height: 150px;" ng-click="selectedProteccionF1()">
+                                    <option value={{empresaAux8}}
+                                            ng-repeat="empresaAux8 in listaSeleccionProteccion | filter:search8| orderBy:empresaAux8.nombre_proteccion">
+                                        {{empresaAux8.nombre_proteccion}}
+                                    </option>
+                                </select><br>
+
+                            </div>
+
+
+                                <div class="col-md-3 col-xs-12">
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+
+
+                                    <input class="btn btn-info" type="submit" ng-click="test()"
+                                           value="Guardar Paciente"/><br><br>
+
+                                </div>
+
+                        </div>
+                    </div><!--div fin contaniner-->
+
+            </div><!--div fin contaniner-->
+        </div>
+            <div class="row">
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+</form>
+
+</body>
+</html>
