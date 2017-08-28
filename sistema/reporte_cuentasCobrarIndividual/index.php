@@ -1,7 +1,7 @@
 
 <html>
     <head>
-        <title>Cobros</title>
+        <title>CUENTAS X COBRAR INDIVIDUAL</title>
         <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
         <link href="../calendario/calendar-blue.css" rel="stylesheet" type="text/css">
         <script type="text/JavaScript" language="javascript" src="../calendario/calendar.js"></script>
@@ -85,8 +85,8 @@
                     <div id="frmResultado">				
                         </form>
                         <div id="lineaResultado">
-                            <iframe width="100%" height="350" id="frame_rejilla" name="frame_rejilla" frameborder="0">
-                            <ilayer width="100%" height="350" id="frame_rejilla" name="frame_rejilla"></ilayer>
+                            <iframe width="100%" height="600" id="frame_rejilla" name="frame_rejilla" frameborder="0">
+                            <ilayer width="100%" height="600" id="frame_rejilla" name="frame_rejilla"></ilayer>
                             </iframe>
                         </div>
                         <iframe id="frame_datos" name="frame_datos" width="0" height="0" frameborder="0">

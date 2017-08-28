@@ -207,7 +207,7 @@ if ($accion == "baja") {
                 parent.opener.document.formulario.codcliente.value = id;
                 parent.opener.document.formulario.nombre.value = nombre;
                 parent.opener.document.formulario.ci_ruc.value = ci_ruc;
-                parent.opener.document.formulario.tipocliente.value = tipocliente;
+                parent.opener.document.formulario.tipo_cliente.value = tipocliente;
                 parent.window.close();
             }
             else

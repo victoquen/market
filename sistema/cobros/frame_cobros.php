@@ -69,6 +69,7 @@ if ($accion=="insertar") {
 	$observaciones=$_POST["observaciones"];
 	//$estado=$_POST["cboEstados"];
 	$fechacobro=$_POST["fechacobro"];
+	
 	if($formapago == 1){
 		$idbanco = 1;
 	}else{

@@ -1776,16 +1776,16 @@ gestionando totales
                           case "0":
                               credit=1;
                             cboplazo.selectedIndex=0;
-                            cboplazo.disabled = true;
+                            cboplazo.readonly = true;
                             break;
                             case "2":
                              credit=0;
                             cboplazo.selectedIndex=0;
-                            cboplazo.disabled = true;
+                            cboplazo.readonly = true;
                             break;
                           default:
                               credit=1;
-                            cboplazo.disabled = false;
+                            cboplazo.readonly = false;
                             cboplazo.selectedIndex=1;
                             break;
                       }

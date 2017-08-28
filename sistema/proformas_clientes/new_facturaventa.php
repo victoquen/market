@@ -152,7 +152,7 @@ else{
                                                                 <option value="2" selected></option>
                                                             </select>
 
-                                                            <select name="cboplazo" id="cboplazo" class="comboPequeno" disabled="true">
+                                                            <select name="cboplazo" id="cboplazo" class="comboPequeno" readonly="true">
                                                                 <option value="0">0 d&iacute;as</option>
                                                                 <option value="1">30 d&iacute;as</option>
                                                                 <option value="2">60 d&iacute;as</option>

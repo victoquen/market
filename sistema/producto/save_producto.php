@@ -32,6 +32,9 @@ if ($accion != "baja") {
     $stock = $_POST["Rstock"];
     $costo = $_POST["qcosto"];
     $pvp = $_POST["Qpvp"];
+    $pvp2 = $_POST["Qpvp2"];
+    $pvp3 = $_POST["Qpvp3"];
+    $pvp4 = $_POST["Qpvp4"];
     $iva = $_POST["iva"];
     $especial = $_POST["especial"];
 
@@ -46,6 +49,10 @@ if ($accion != "baja") {
     $utilidad = $_POST["qutilidad"];
     $bodega = $_POST["Acbobodega"];
 
+    $lector = $_POST["alector"];
+    $unidad = $_POST["aunidad"];
+    $uxpaca = $_POST["auxpaca"];
+
     $esGasto = $_POST["Agasto"];
     if ($esGasto == "no") {
         $gasto = 0;
@@ -59,7 +66,9 @@ if ($accion != "baja") {
 
 if ($accion == "alta") {
     $producto = new Producto();
-    $idproducto = $producto->save_producto($conn, $codigo, $nombre, $stock, $costo, $pvp, $iva, $composicion, $aplicacion, $proveedor, $grupo, $subgrupo, $stock_consignacion, $gasto, $utilidad, $bodega, $especial);
+    $idproducto = $producto->save_producto($conn, $codigo, $nombre, $stock, $costo, $pvp, $iva, $composicion, $aplicacion,
+                                            $proveedor, $grupo, $subgrupo, $stock_consignacion, $gasto, $utilidad,
+                                            $bodega, $especial, $pvp2, $pvp3, $pvp4, $unidad, $uxpaca, $lector);
 
 
     if ($idproducto) {
@@ -76,7 +85,9 @@ if ($accion == "alta") {
 if ($accion == "modificar") {
     $idproducto = $_POST["idproducto"];
     $producto = new Producto();
-    $result = $producto->update_producto($conn, $idproducto, $codigo, $nombre, $stock, $costo, $pvp, $iva, $composicion, $aplicacion, $proveedor, $grupo, $subgrupo, $stock_consignacion, $gasto, $utilidad, $especial);
+    $result = $producto->update_producto($conn, $idproducto, $codigo, $nombre, $stock, $costo, $pvp, $iva, $composicion,
+                                            $aplicacion, $proveedor, $grupo, $subgrupo, $stock_consignacion, $gasto,
+                                            $utilidad, $especial, $pvp2, $pvp3, $pvp4, $unidad, $uxpaca, $lector);
 
     if ($result) {
         $mensaje = "Los datos del producto han sido modificados correctamente";
@@ -842,6 +853,18 @@ if ($accion == "baja") {
                     <tr>
                         <td>PVP</td>
                         <td colspan="2"><?php  echo $pvp ?></td>
+                    </tr>
+                    <tr>
+                        <td>PVP2</td>
+                        <td colspan="2"><?php  echo $pvp2 ?></td>
+                    </tr>
+                    <tr>
+                        <td>PVP3</td>
+                        <td colspan="2"><?php  echo $pvp3 ?></td>
+                    </tr>
+                    <tr>
+                        <td>PVP4</td>
+                        <td colspan="2"><?php  echo $pvp4 ?></td>
                     </tr>
 
                     <tr>

@@ -4,7 +4,7 @@
 	 */
 
 	/* Array of database columns which should be read and sent back to DataTables */
-	$aColumns = array('codigo', 'nombre' );
+	$aColumns = array('id_grupo','codigo', 'nombre' );
         $aColumns_aux=array('codigo', 'nombre' );
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "id_grupo";
@@ -155,9 +155,9 @@
 		 * database - you can do it here
 		 */
  
-//                $sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/modificar.png' border='0' width='16' height='16' border='1' title='Modificar' onClick='modificar_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
-//                $sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/ver.png' border='0' width='16' height='16' border='1' title='ver' onClick='ver_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
-//                $sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/eliminar.png' border='0' width='16' height='16' border='1' title='Eliminar' onClick='eliminar_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
+                $sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/modificar.png' border='0' width='16' height='16' border='1' title='Modificar' onClick='modificar_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
+                $sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/ver.png' border='0' width='16' height='16' border='1' title='ver' onClick='ver_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
+                //$sOutput .= '"'.str_replace('"', '\"', "<a href='#'><img src='../img/eliminar.png' border='0' width='16' height='16' border='1' title='Eliminar' onClick='eliminar_grupo(".$code_aux.")' onMouseOver='style.cursor=cursor'></a>").'",';
 
                 
 		$sOutput = substr_replace( $sOutput, "", -1 );

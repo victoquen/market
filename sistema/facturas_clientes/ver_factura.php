@@ -63,7 +63,7 @@ $idfacturero = mysql_result($rs_query, 0, "id_facturero");
             }
 
             function imprimir(idfactura) {
-            window.open("../imprimir/imprimir_factura_electroparc.php?idfactura=" + idfactura);
+            window.open("../imprimir/imprimir_factura_venta.php?idfactura=" + idfactura);
             }
 
         </script>

@@ -5,7 +5,7 @@
 
 	/* Array of database columns which should be read and sent back to DataTables */
 	$aColumns = array('id_factura', 'fecha','id_facturero','codigo_factura', 'nombre', 't_cliente', 'totalfactura', 'credito', 'plazo', 'estado', 'remision'  );
-	$aColumnsAux=array( 'id_factura','a.fecha','a.id_facturero', 'a.codigo_factura', 'b.nombre', 'c.nombre', 'a.totalfactura', 'a.credito', 'a.plazo','a.estado');
+	$aColumnsAux=array( 'a.id_factura','a.fecha','a.id_facturero', 'a.codigo_factura', 'b.nombre', 'c.nombre', 'a.totalfactura', 'a.credito', 'a.plazo','a.estado');
 
 	//$aColumns = array('id_factura', 'fecha','codigo_factura', 'nombre', 't_cliente', 'totalfactura', 'credito', 'plazo', 'estado', 'remision' );
 	//$aColumnsAux=array( 'id_factura','a.fecha', 'a.codigo_factura', 'b.nombre', 'c.nombre', 'a.totalfactura', 'a.credito', 'a.plazo','a.estado');

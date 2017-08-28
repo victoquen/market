@@ -161,13 +161,13 @@ $total_factura=mysql_result($rs_totreten,0,"total_factura");
                                         
                                         <th width="7%"><span style="font-size: 10px">Fecha</span></th>
                                         <th width="7%"><span style="font-size: 10px">RUC</span></th>
-                                        <th ><span style="font-size: 10px">Cliente</span></th>
+                                        <th width="25%"><span style="font-size: 10px">Cliente</span></th>
                                         <th width="7%"><span style="font-size: 10px">Autoriz</span></th>
                                         <th width="4%"><span style="font-size: 10px">Serie1</span></th>
                                         <th width="4%"><span style="font-size: 10px">Serie2</span></th>
                                         <th width="7%"><span style="font-size: 10px">#Factura</span></th>                                                                                                                       
                                         <th width="9%"><span style="font-size: 10px">Iva 0%</span></th>
-                                        <th width="9%"><span style="font-size: 10px">Iva 12%</span></th>
+                                        <th width="9%"><span style="font-size: 10px">Iva grava%</span></th>
                                         <th width="9%"><span style="font-size: 10px">IVA</span></th>
                                        <th width="9%"><span style="font-size: 10px">$Factura</span></th>                                        
                                     </tr>

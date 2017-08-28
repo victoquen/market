@@ -45,7 +45,7 @@ if ($modif<>1) {
 				
 
 				$sel_insert="INSERT INTO proveedorbanco (id_banco,id_proveedor,banco,titular,numero_cuenta,tipo_cuenta)
-                                            VALUES ('','$idproveedor','$banco','$titular','$numero_cuenta','$tipo')";
+                                            VALUES (null,'$idproveedor','$banco','$titular','$numero_cuenta','$tipo')";
 				$rs_insert=mysql_query($sel_insert, $conn);
 
 		}

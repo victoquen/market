@@ -3,7 +3,10 @@ header('Cache-Control: no-cache');
 header('Pragma: no-cache');
 
 
-$op = $_POST["op"];
+//$op = $_POST["op"];
+
+$text_search = $_POST["text_search"];
+
 
 include("../conexion/conexion.php");
 error_reporting(0);
@@ -13,6 +16,10 @@ $sel_iva = "select porcentaje FROM iva where activo=1 AND borrado=0";
 $rs_iva = mysql_query($sel_iva, $conn);
 $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
 
+$sel_tar = "select porcentaje FROM porcentaje_tarjetacredito where  borrado=0 limit 1";
+$rs_tar = mysql_query($sel_tar, $conn);
+$prorrateo_porcentaje = mysql_result($rs_tar, 0, "porcentaje");
+
 ?>
 <html>
 <head>
@@ -21,18 +28,30 @@ $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
     <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 
     <!-- INICIO archivos para DATA TABLES-->
-    <style type="text/css" title="currentStyle">
+    <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
+    <link href="../css/style1.css" type="text/css" rel="stylesheet">
 
-        @import "../css/demo_table.css";
-    </style>
-    <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+    <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
+    <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
+    <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-    <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+    <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
+    <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.flash.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/jszip.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/pdfmake.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
 
+    <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
     <!-- FIN archivos para DATA TABLES-->
 
 
     <script language="javascript">
+
 
         function ver_producto(idproducto) {
             parent.location.href = "ver_producto.php?idproducto=" + idproducto;
@@ -49,32 +68,21 @@ $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
 
         $(document).ready(function () {
 
-            var oTable = $('#example').dataTable({
-                "bProcessing": true,
-                "bServerSide": true,
-                "sAjaxSource": "processing_inventario_productos.php",
+            var oTable = $('#example').DataTable({
+                "processing": true,
+                "serverSide": true,
                 "sPaginationType": "full_numbers",
-                /*"sDom": 'T<"clear">lfrtip',
-                 "oTableTools": {
-                 "sSwfPath": "TableTools-2.0.1/media/swf/copy_cvs_xls_pdf.swf",
-                 "aButtons": [
 
-                 "xls",
-                 {
-                 "sExtends": "pdf",
-                 "sPdfOrientation": "landscape",
-                 "sPdfMessage": " Agro "
+                "sAjaxSource": "processing_inventario_productos.php",
 
-                 },
-                 {
-                 "sExtends": "print",
-                 "sButtonText": "Imprimir",
-                 "sInfo": "<h6>Vista Impresi&oacute;n</h6>Por favor use las funciones de impresi&oacute;n de su navegador para imprimir la tabla.<br/> Presione ESCAPE cuando haya finalizado.",
-                 "sMessage": "<H3>Inventario Productos</H3><br/>"
+                "aoColumns": [
+                    {"bVisible": false, "aSorting": ["desc", "asc"]},
+                    null,
+                    null,
+                    null,
+                    {"bSearchable": false, "bSortable": false}
+                ],
 
-                 }
-                 ]
-                 },*/
                 "oLanguage": {
                     "oPaginate": {
                         "sPrevious": "Anterior",
@@ -97,7 +105,11 @@ $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
 
 
             });
-            $('input:text').focus();
+            var txtSearch = parent.opener.document.getElementById("dproducto").value;
+
+            $('div.dataTables_filter input').value = txtSearch;
+            oTable.search(txtSearch).draw();
+            $('div.dataTables_filter input').focus();
 
 
         });
@@ -113,924 +125,152 @@ $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
     }
 
 
-
-    function pon_prefijo(codarticulo, nombre, precio, idarticulo, costo, stock, iva, transformacion, precio_con_iva, series) {
+    function pon_prefijo(codarticulo, nombre, precio, idarticulo, costo, stock, iva, transformacion, precio_con_iva, series, pvp2, pvp3, pvp4) {
+        var origen = parent.opener.document.getElementById("accion").value;
+        var codtmp = localStorage.getItem('codtmp');
+        var id_bodega = localStorage.getItem('id_bodega');
         var password = null;
         var clave = "a";
         var arrayJSindice = null;
         var arrayJSnombre = null;
-        var op =<?php echo $op ?>;
-        if (stock > 0) {
-            switch (op) {
-                case 1:
+        var porcentaje_iva = <?php echo $ivaporcetaje;?>;
+
+        var imp_aux = 0;
+
+        var op_formapago = localStorage.getItem('forma_pago');
+        var prorrateo_porcentaje = 0;
+        if (op_formapago == 5) {
+            prorrateo_porcentaje = <?php echo $prorrateo_porcentaje?>
+        }
+
+        parent.opener.document.getElementById("id_bodega").value = id_bodega;
 
 
-                    parent.opener.document.formulario.descripcion1.value = nombre;
-                    parent.opener.document.formulario.precio1.value = precio;
-                    parent.opener.document.formulario.idarticulo1.value = idarticulo;
-                    parent.opener.document.formulario.costo1.value = costo;
-                    parent.opener.document.formulario.stock1.value = stock;
-
-                    removeOptions(parent.opener.document.formulario.series1);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series1.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
+        parent.opener.document.getElementById("dproducto").value = nombre;
+        parent.opener.document.getElementById("cantidad").value = 1;
 
 
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc1.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva1.style.display = 'inherit';
 
-                    }
-                    else {
-
-                        parent.opener.document.formulario.ivaporc1.value = 0;
-                        parent.opener.document.formulario.grabaiva1.style.display = 'none';
-                    }
-
-                    parent.opener.document.formulario.transformacion1.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva1.value = precio_con_iva;
+        precio_prorrateado = precio_alone * (1 + prorrateo_porcentaje / 100);
+        original = parseFloat(precio_prorrateado);
+        result = Math.round(original * 100) / 100;
 
 
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega1');
+
+        var precio_prorrateado1 = precio * (1 + prorrateo_porcentaje / 100);
+        var original1 = parseFloat(precio_prorrateado1);
+        var result1 = Math.round(original1 * 100) / 100;
+        parent.opener.document.getElementById("pvpa").value =  result1.toFixed(2);
+        var precio_prorrateado2 = pvp2 * (1 + prorrateo_porcentaje / 100);
+        var original2 = parseFloat(precio_prorrateado2);
+        var result2 = Math.round(original2 * 100) / 100;
+        parent.opener.document.getElementById("pvpb").value =  result2.toFixed(2);
+        var precio_prorrateado3 = pvp3 * (1 + prorrateo_porcentaje / 100);
+        var original3 = parseFloat(precio_prorrateado3);
+        var result3 = Math.round(original3 * 100) / 100;
+        parent.opener.document.getElementById("pvpc").value =  result3.toFixed(2);
+        var precio_prorrateado4 = pvp4 * (1 + prorrateo_porcentaje / 100);
+        var original4 = parseFloat(precio_prorrateado4);
+        var result4 = Math.round(original4 * 100) / 100;
+        parent.opener.document.getElementById("pvpd").value =  result4.toFixed(2);
+
+        var op_des = localStorage.getItem('descuento');
+        var precio_alone = 0;
+        
+        switch (op_des) {
+            case '1':
+                precio_alone = precio;
+                parent.opener.document.getElementById("tipo_pvp").innerHTML = "A";
+                break;
+            case '2':
+                precio_alone = pvp2;
+                parent.opener.document.getElementById("tipo_pvp").innerHTML = "B";
+                break;
+            case '3':
+                precio_alone = pvp3;
+                parent.opener.document.getElementById("tipo_pvp").innerHTML = "C";
+                break;
+            case '4':
+                precio_alone = pvp4;
+                parent.opener.document.getElementById("tipo_pvp").innerHTML = "D";
+                break;
+        }
+
+        var precio_prorrateado = precio_alone * (1 + prorrateo_porcentaje / 100);
+        var original = parseFloat(precio_prorrateado);
+        var result = Math.round(original * 100) / 100;
+        parent.opener.document.getElementById("precio").value = result.toFixed(2);
+        imp_aux = parent.opener.actualizar_importe_individual(1, result.toFixed(2));
 
 
-                    break;
 
-                case 2:
+        var iva_aux = parent.opener.actualizar_iva_individual(imp_aux, porcentaje_iva, iva);
 
-                    parent.opener.document.formulario.descripcion2.value = nombre;
-                    parent.opener.document.formulario.precio2.value = precio;
-                    parent.opener.document.formulario.idarticulo2.value = idarticulo;
-                    parent.opener.document.formulario.costo2.value = costo;
-                    parent.opener.document.formulario.stock2.value = stock;
-                    parent.opener.document.formulario.series2.value = series;
+        parent.opener.document.getElementById("dcto").value = 0;
 
-                    removeOptions(parent.opener.document.formulario.series2);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series2.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
+        parent.opener.document.getElementById("costo").value = costo;
+        parent.opener.document.getElementById("iva").value = iva_aux;
 
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc2.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva2.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc2.value = 0;
-                        parent.opener.document.formulario.grabaiva2.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion2.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva2.value = precio_con_iva;
+        if (origen == "alta") {
+            parent.opener.document.getElementById("codtmp").value = codtmp;
+            parent.opener.document.getElementById("id_articulo").value = idarticulo;
+            parent.opener.document.getElementById("importe").value = imp_aux;
+        } else if (origen == "modificar") {
+            parent.opener.document.getElementById("id_factura").value = codtmp;
+            parent.opener.document.getElementById("id_producto").value = idarticulo;
+            parent.opener.document.getElementById("subtotal").value = imp_aux;
+        }
 
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega2');
-                    break;
 
-                case 3:
+        if (iva == 1) {
 
-                    parent.opener.document.formulario.descripcion3.value = nombre;
-                    parent.opener.document.formulario.precio3.value = precio;
-                    parent.opener.document.formulario.idarticulo3.value = idarticulo;
-                    parent.opener.document.formulario.costo3.value = costo;
-                    parent.opener.document.formulario.stock3.value = stock;
-                    parent.opener.document.formulario.series3.value = series;
+            parent.opener.document.getElementById("dproducto").style.background = 'orange';
 
-                    removeOptions(parent.opener.document.formulario.series3);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series3.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc3.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva3.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc3.value = 0;
-                        parent.opener.document.formulario.grabaiva3.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion3.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva3.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega3');
-                    break;
-
-                case 4:
-
-                    parent.opener.document.formulario.descripcion4.value = nombre;
-                    parent.opener.document.formulario.precio4.value = precio;
-                    parent.opener.document.formulario.idarticulo4.value = idarticulo;
-                    parent.opener.document.formulario.costo4.value = costo;
-                    parent.opener.document.formulario.stock4.value = stock;
-                    parent.opener.document.formulario.series4.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series4);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series4.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc4.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva4.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc4.value = 0;
-                        parent.opener.document.formulario.grabaiva4.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion4.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva4.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega4');
-                    break;
-
-                case 5:
-
-                    parent.opener.document.formulario.descripcion5.value = nombre;
-                    parent.opener.document.formulario.precio5.value = precio;
-                    parent.opener.document.formulario.idarticulo5.value = idarticulo;
-                    parent.opener.document.formulario.costo5.value = costo;
-                    parent.opener.document.formulario.stock5.value = stock;
-                    parent.opener.document.formulario.series5.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series5);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series5.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc5.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva5.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc5.value = 0;
-                        parent.opener.document.formulario.grabaiva5.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion5.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva5.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega5');
-                    break;
-
-                case 6:
-
-                    parent.opener.document.formulario.descripcion6.value = nombre;
-                    parent.opener.document.formulario.precio6.value = precio;
-                    parent.opener.document.formulario.idarticulo6.value = idarticulo;
-                    parent.opener.document.formulario.costo6.value = costo;
-                    parent.opener.document.formulario.stock6.value = stock;
-                    parent.opener.document.formulario.series6.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series6);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series6.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc6.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva6.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc6.value = 0;
-                        parent.opener.document.formulario.grabaiva6.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion6.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva6.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega6');
-                    break;
-
-                case 7:
-
-                    parent.opener.document.formulario.descripcion7.value = nombre;
-                    parent.opener.document.formulario.precio7.value = precio;
-                    parent.opener.document.formulario.idarticulo7.value = idarticulo;
-                    parent.opener.document.formulario.costo7.value = costo;
-                    parent.opener.document.formulario.stock7.value = stock;
-                    parent.opener.document.formulario.series7.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series7);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series7.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc7.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva7.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc7.value = 0;
-                        parent.opener.document.formulario.grabaiva7.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion7.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva7.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega7');
-                    break;
-
-                case 8:
-
-                    parent.opener.document.formulario.descripcion8.value = nombre;
-                    parent.opener.document.formulario.precio8.value = precio;
-                    parent.opener.document.formulario.idarticulo8.value = idarticulo;
-                    parent.opener.document.formulario.costo8.value = costo;
-                    parent.opener.document.formulario.stock8.value = stock;
-                    parent.opener.document.formulario.series8.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series8);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series8.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc8.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva8.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc8.value = 0;
-                        parent.opener.document.formulario.grabaiva8.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion8.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva8.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega8');
-                    break;
-
-                case 9:
-
-                    parent.opener.document.formulario.descripcion9.value = nombre;
-                    parent.opener.document.formulario.precio9.value = precio;
-                    parent.opener.document.formulario.idarticulo9.value = idarticulo;
-                    parent.opener.document.formulario.costo9.value = costo;
-                    parent.opener.document.formulario.stock9.value = stock;
-                    parent.opener.document.formulario.series9.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series9);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series9.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc9.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva9.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc9.value = 0;
-                        parent.opener.document.formulario.grabaiva9.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion9.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva9.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega9');
-                    break;
-
-                case 10:
-
-                    parent.opener.document.formulario.descripcion10.value = nombre;
-                    parent.opener.document.formulario.precio10.value = precio;
-                    parent.opener.document.formulario.idarticulo10.value = idarticulo;
-                    parent.opener.document.formulario.costo10.value = costo;
-                    parent.opener.document.formulario.stock10.value = stock;
-                    parent.opener.document.formulario.series10.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series10);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series10.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc10.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva10.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc10.value = 0;
-                        parent.opener.document.formulario.grabaiva10.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion10.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva10.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega10');
-                    break;
-                case 11:
-                    
-                    parent.opener.document.formulario.descripcion11.value = nombre;
-                    parent.opener.document.formulario.precio11.value = precio;
-                    parent.opener.document.formulario.idarticulo11.value = idarticulo;
-                    parent.opener.document.formulario.costo11.value = costo;
-                    parent.opener.document.formulario.stock11.value = stock;
-                    parent.opener.document.formulario.series11.value = series;
-
-                    removeOptions(parent.opener.document.formulario.series11);
-                    for (obj in series) {
-                        // Create an Option object
-                        var opt = document.createElement("option");
-                        // Add an Option object to Drop Down/List Box
-                        parent.opener.document.formulario.series11.options.add(opt);
-                        // Assign text and value to Option object
-                        opt.text = series[obj];
-                        opt.value = obj;
-                    }
-
-                    if (iva == 1) {
-                        parent.opener.document.formulario.ivaporc11.value = <?php echo $ivaporcetaje;?>;
-                        parent.opener.document.formulario.grabaiva11.style.display = 'inherit';
-                    }
-                    else {
-                        parent.opener.document.formulario.ivaporc11.value = 0;
-                        parent.opener.document.formulario.grabaiva11.style.display = 'none';
-                    }
-                    parent.opener.document.formulario.transformacion11.value = transformacion;
-                    parent.opener.document.formulario.precio_con_iva11.value = precio_con_iva;
-
-                    parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega11');
-                    break;
-            }
-
-            parent.opener.actualizar_importe(op);
-            parent.window.close();
         }
         else {
-            if (stock_consignacion > 0) {
-                switch (op) {
-                    case 1:
-                        parent.opener.document.formulario.codarticulo1.value = codarticulo;
-                        parent.opener.document.formulario.descripcion1.value = nombre;
-                        parent.opener.document.formulario.precio1.value = precio;
-                        parent.opener.document.formulario.idarticulo1.value = idarticulo;
-                        parent.opener.document.formulario.costo1.value = costo;
-                        parent.opener.document.formulario.stock1.value = stock_consignacion;
-                        parent.opener.document.formulario.series1.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc1.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva1.style.display = 'inherit';
 
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc1.value = 0;
-                            parent.opener.document.formulario.grabaiva1.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion1.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva1.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega1');
-                        break;
-
-                    case 2:
-                        parent.opener.document.formulario.codarticulo2.value = codarticulo;
-                        parent.opener.document.formulario.descripcion2.value = nombre;
-                        parent.opener.document.formulario.precio2.value = precio;
-                        parent.opener.document.formulario.idarticulo2.value = idarticulo;
-                        parent.opener.document.formulario.costo2.value = costo;
-                        parent.opener.document.formulario.stock2.value = stock_consignacion;
-                        parent.opener.document.formulario.series2.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc2.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva2.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc2.value = 0;
-                            parent.opener.document.formulario.grabaiva2.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion2.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva2.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega2');
-                        break;
-
-                    case 3:
-                        parent.opener.document.formulario.codarticulo3.value = codarticulo;
-                        parent.opener.document.formulario.descripcion3.value = nombre;
-                        parent.opener.document.formulario.precio3.value = precio;
-                        parent.opener.document.formulario.idarticulo3.value = idarticulo;
-                        parent.opener.document.formulario.costo3.value = costo;
-                        parent.opener.document.formulario.stock3.value = stock_consignacion;
-                        parent.opener.document.formulario.series3.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc3.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva3.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc3.value = 0;
-                            parent.opener.document.formulario.grabaiva3.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion3.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva3.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega3');
-                        break;
-
-                    case 4:
-                        parent.opener.document.formulario.codarticulo4.value = codarticulo;
-                        parent.opener.document.formulario.descripcion4.value = nombre;
-                        parent.opener.document.formulario.precio4.value = precio;
-                        parent.opener.document.formulario.idarticulo4.value = idarticulo;
-                        parent.opener.document.formulario.costo4.value = costo;
-                        parent.opener.document.formulario.stock4.value = stock_consignacion;
-                        parent.opener.document.formulario.series4.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc4.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva4.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc4.value = 0;
-                            parent.opener.document.formulario.grabaiva4.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion4.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva4.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega4');
-                        break;
-
-                    case 5:
-                        parent.opener.document.formulario.codarticulo5.value = codarticulo;
-                        parent.opener.document.formulario.descripcion5.value = nombre;
-                        parent.opener.document.formulario.precio5.value = precio;
-                        parent.opener.document.formulario.idarticulo5.value = idarticulo;
-                        parent.opener.document.formulario.costo5.value = costo;
-                        parent.opener.document.formulario.stock5.value = stock_consignacion;
-                        parent.opener.document.formulario.series5.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc5.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva5.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc5.value = 0;
-                            parent.opener.document.formulario.grabaiva5.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion5.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva5.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega5');
-                        break;
-
-                    case 6:
-                        parent.opener.document.formulario.codarticulo6.value = codarticulo;
-                        parent.opener.document.formulario.descripcion6.value = nombre;
-                        parent.opener.document.formulario.precio6.value = precio;
-                        parent.opener.document.formulario.idarticulo6.value = idarticulo;
-                        parent.opener.document.formulario.costo6.value = costo;
-                        parent.opener.document.formulario.stock6.value = stock_consignacion;
-                        parent.opener.document.formulario.series6.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc6.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva6.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc6.value = 0;
-                            parent.opener.document.formulario.grabaiva6.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion6.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva6.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega6');
-                        break;
-
-                    case 7:
-                        parent.opener.document.formulario.codarticulo7.value = codarticulo;
-                        parent.opener.document.formulario.descripcion7.value = nombre;
-                        parent.opener.document.formulario.precio7.value = precio;
-                        parent.opener.document.formulario.idarticulo7.value = idarticulo;
-                        parent.opener.document.formulario.costo7.value = costo;
-                        parent.opener.document.formulario.stock7.value = stock_consignacion;
-                        parent.opener.document.formulario.series7.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc7.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva7.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc7.value = 0;
-                            parent.opener.document.formulario.grabaiva7.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion7.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva7.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega7');
-                        break;
-
-                    case 8:
-                        parent.opener.document.formulario.codarticulo8.value = codarticulo;
-                        parent.opener.document.formulario.descripcion8.value = nombre;
-                        parent.opener.document.formulario.precio8.value = precio;
-                        parent.opener.document.formulario.idarticulo8.value = idarticulo;
-                        parent.opener.document.formulario.costo8.value = costo;
-                        parent.opener.document.formulario.stock8.value = stock_consignacion;
-                        parent.opener.document.formulario.series8.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc8.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva8.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc8.value = 0;
-                            parent.opener.document.formulario.grabaiva8.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion8.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva8.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega8');
-                        break;
-
-                    case 9:
-                        parent.opener.document.formulario.codarticulo9.value = codarticulo;
-                        parent.opener.document.formulario.descripcion9.value = nombre;
-                        parent.opener.document.formulario.precio9.value = precio;
-                        parent.opener.document.formulario.idarticulo9.value = idarticulo;
-                        parent.opener.document.formulario.costo9.value = costo;
-                        parent.opener.document.formulario.stock9.value = stock_consignacion;
-                        parent.opener.document.formulario.series9.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc9.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva9.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc9.value = 0;
-                            parent.opener.document.formulario.grabaiva9.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion9.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva9.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega9');
-                        break;
-
-                    case 10:
-                        parent.opener.document.formulario.codarticulo10.value = codarticulo;
-                        parent.opener.document.formulario.descripcion10.value = nombre;
-                        parent.opener.document.formulario.precio10.value = precio;
-                        parent.opener.document.formulario.idarticulo10.value = idarticulo;
-                        parent.opener.document.formulario.costo10.value = costo;
-                        parent.opener.document.formulario.stock10.value = stock_consignacion;
-                        parent.opener.document.formulario.series10.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc10.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva10.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc10.value = 0;
-                            parent.opener.document.formulario.grabaiva10.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion10.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva10.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega10');
-                        break;
-                    case 11:
-                        parent.opener.document.formulario.codarticulo11.value = codarticulo;
-                        parent.opener.document.formulario.descripcion11.value = nombre;
-                        parent.opener.document.formulario.precio11.value = precio;
-                        parent.opener.document.formulario.idarticulo11.value = idarticulo;
-                        parent.opener.document.formulario.costo11.value = costo;
-                        parent.opener.document.formulario.stock11.value = stock_consignacion;
-                        parent.opener.document.formulario.series11.value = series;
-                        if (iva == 1) {
-                            parent.opener.document.formulario.ivaporc11.value = <?php echo $ivaporcetaje;?>;
-                            parent.opener.document.formulario.grabaiva11.style.display = 'inherit';
-                        }
-                        else {
-                            parent.opener.document.formulario.ivaporc11.value = 0;
-                            parent.opener.document.formulario.grabaiva11.style.display = 'none';
-                        }
-                        parent.opener.document.formulario.transformacion11.value = transformacion;
-                        parent.opener.document.formulario.precio_con_iva11.value = precio_con_iva;
-
-                        parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega11');
-                        break;
-                }
-
-                parent.opener.actualizar_importe(op);
-                parent.window.close();
-            }
-
-
-            else {
-                //alert("Producto sin STOCK en bodega.\n No puede ser seleccionado." );
-                password = prompt("Producto sin STOCK en bodega.\n\nPara permitira su seleccion\nIngrese el password ", '');
-                if (password == clave) {
-                    switch (op) {
-                        case 1:
-                            parent.opener.document.formulario.codarticulo1.value = codarticulo;
-                            parent.opener.document.formulario.descripcion1.value = nombre;
-                            parent.opener.document.formulario.precio1.value = precio;
-                            parent.opener.document.formulario.idarticulo1.value = idarticulo;
-                            parent.opener.document.formulario.costo1.value = costo;
-                            parent.opener.document.formulario.stock1.value = stock;
-                            parent.opener.document.formulario.series1.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc1.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva1.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc1.value = 0;
-                                parent.opener.document.formulario.grabaiva1.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion1.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva1.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad1.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega1');
-                            break;
-
-                        case 2:
-                            parent.opener.document.formulario.codarticulo2.value = codarticulo;
-                            parent.opener.document.formulario.descripcion2.value = nombre;
-                            parent.opener.document.formulario.precio2.value = precio;
-                            parent.opener.document.formulario.idarticulo2.value = idarticulo;
-                            parent.opener.document.formulario.costo2.value = costo;
-                            parent.opener.document.formulario.stock2.value = stock;
-                            parent.opener.document.formulario.series2.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc2.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva2.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc2.value = 0;
-                                parent.opener.document.formulario.grabaiva2.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion2.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva2.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad2.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega2');
-                            break;
-
-                        case 3:
-                            parent.opener.document.formulario.codarticulo3.value = codarticulo;
-                            parent.opener.document.formulario.descripcion3.value = nombre;
-                            parent.opener.document.formulario.precio3.value = precio;
-                            parent.opener.document.formulario.idarticulo3.value = idarticulo;
-                            parent.opener.document.formulario.costo3.value = costo;
-                            parent.opener.document.formulario.stock3.value = stock;
-                            parent.opener.document.formulario.series3.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc3.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva3.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc3.value = 0;
-                                parent.opener.document.formulario.grabaiva3.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion3.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva3.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad3.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega3');
-                            break;
-
-                        case 4:
-                            parent.opener.document.formulario.codarticulo4.value = codarticulo;
-                            parent.opener.document.formulario.descripcion4.value = nombre;
-                            parent.opener.document.formulario.precio4.value = precio;
-                            parent.opener.document.formulario.idarticulo4.value = idarticulo;
-                            parent.opener.document.formulario.costo4.value = costo;
-                            parent.opener.document.formulario.stock4.value = stock;
-                            parent.opener.document.formulario.series4.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc4.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva4.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc4.value = 0;
-                                parent.opener.document.formulario.grabaiva4.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion4.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva4.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad4.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega4');
-                            break;
-
-                        case 5:
-                            parent.opener.document.formulario.codarticulo5.value = codarticulo;
-                            parent.opener.document.formulario.descripcion5.value = nombre;
-                            parent.opener.document.formulario.precio5.value = precio;
-                            parent.opener.document.formulario.idarticulo5.value = idarticulo;
-                            parent.opener.document.formulario.costo5.value = costo;
-                            parent.opener.document.formulario.stock5.value = stock;
-                            parent.opener.document.formulario.series5.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc5.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva5.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc5.value = 0;
-                                parent.opener.document.formulario.grabaiva5.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion5.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva5.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad5.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega5');
-                            break;
-
-                        case 6:
-                            parent.opener.document.formulario.codarticulo6.value = codarticulo;
-                            parent.opener.document.formulario.descripcion6.value = nombre;
-                            parent.opener.document.formulario.precio6.value = precio;
-                            parent.opener.document.formulario.idarticulo6.value = idarticulo;
-                            parent.opener.document.formulario.costo6.value = costo;
-                            parent.opener.document.formulario.stock6.value = stock;
-                            parent.opener.document.formulario.series6.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc6.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva6.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc6.value = 0;
-                                parent.opener.document.formulario.grabaiva6.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion6.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva6.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad6.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega6');
-                            break;
-
-                        case 7:
-                            parent.opener.document.formulario.codarticulo7.value = codarticulo;
-                            parent.opener.document.formulario.descripcion7.value = nombre;
-                            parent.opener.document.formulario.precio7.value = precio;
-                            parent.opener.document.formulario.idarticulo7.value = idarticulo;
-                            parent.opener.document.formulario.costo7.value = costo;
-                            parent.opener.document.formulario.stock7.value = stock;
-                            parent.opener.document.formulario.series7.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc7.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva7.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc7.value = 0;
-                                parent.opener.document.formulario.grabaiva7.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion7.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva7.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad7.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega7');
-                            break;
-
-                        case 8:
-                            parent.opener.document.formulario.codarticulo8.value = codarticulo;
-                            parent.opener.document.formulario.descripcion8.value = nombre;
-                            parent.opener.document.formulario.precio8.value = precio;
-                            parent.opener.document.formulario.idarticulo8.value = idarticulo;
-                            parent.opener.document.formulario.costo8.value = costo;
-                            parent.opener.document.formulario.stock8.value = stock;
-                            parent.opener.document.formulario.series8.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc8.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva8.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc8.value = 0;
-                                parent.opener.document.formulario.grabaiva8.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion8.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva8.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad8.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega8');
-                            break;
-
-                        case 9:
-                            parent.opener.document.formulario.codarticulo9.value = codarticulo;
-                            parent.opener.document.formulario.descripcion9.value = nombre;
-                            parent.opener.document.formulario.precio9.value = precio;
-                            parent.opener.document.formulario.idarticulo9.value = idarticulo;
-                            parent.opener.document.formulario.costo9.value = costo;
-                            parent.opener.document.formulario.stock9.value = stock;
-                            parent.opener.document.formulario.series9.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc9.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva9.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc9.value = 0;
-                                parent.opener.document.formulario.grabaiva9.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion9.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva9.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad9.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega9');
-                            break;
-
-                        case 10:
-                            parent.opener.document.formulario.codarticulo10.value = codarticulo;
-                            parent.opener.document.formulario.descripcion10.value = nombre;
-                            parent.opener.document.formulario.precio10.value = precio;
-                            parent.opener.document.formulario.idarticulo10.value = idarticulo;
-                            parent.opener.document.formulario.costo10.value = costo;
-                            parent.opener.document.formulario.stock10.value = stock;
-                            parent.opener.document.formulario.series10.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc10.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva10.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc10.value = 0;
-                                parent.opener.document.formulario.grabaiva10.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion10.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva10.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad10.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega10');
-                            break;
-                        case 11:
-                            parent.opener.document.formulario.codarticulo11.value = codarticulo;
-                            parent.opener.document.formulario.descripcion11.value = nombre;
-                            parent.opener.document.formulario.precio11.value = precio;
-                            parent.opener.document.formulario.idarticulo11.value = idarticulo;
-                            parent.opener.document.formulario.costo11.value = costo;
-                            parent.opener.document.formulario.stock11.value = stock;
-                            parent.opener.document.formulario.series11.value = series;
-                            if (iva == 1) {
-                                parent.opener.document.formulario.ivaporc11.value = <?php echo $ivaporcetaje;?>;
-                                parent.opener.document.formulario.grabaiva11.style.display = 'inherit';
-                            }
-                            else {
-                                parent.opener.document.formulario.ivaporc11.value = 0;
-                                parent.opener.document.formulario.grabaiva11.style.display = 'none';
-                            }
-                            parent.opener.document.formulario.transformacion11.value = transformacion;
-                            parent.opener.document.formulario.precio_con_iva11.value = precio_con_iva;
-
-                            parent.opener.document.formulario.cantidad11.value = 0;
-
-                            parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega11');
-                            break;
-                    }
-
-                    parent.opener.actualizar_importe(op);
-                    parent.window.close();
-                }
-            }
+            parent.opener.document.getElementById("dproducto").style.background = 'white';
         }
+
+
+        /*parent.opener.document.formulario.fname.value = nombre;
+         parent.opener.document.formulario.lname.value = precio;
+         parent.opener.document.formulario.tech.value = idarticulo;
+         parent.opener.document.formulario.email.value = costo;
+         parent.opener.document.formulario.address.value = stock;
+         */
+        /*
+         removeOptions(parent.opener.document.formulario.series1);
+         for (obj in series) {
+         // Create an Option object
+         var opt = document.createElement("option");
+         // Add an Option object to Drop Down/List Box
+         parent.opener.document.formulario.series1.options.add(opt);
+         // Assign text and value to Option object
+         opt.text = series[obj];
+         opt.value = obj;
+         }
+
+         if (iva == 1) {
+         parent.opener.document.formulario.ivaporc1.value = <?php //echo $ivaporcetaje;?>;
+         parent.opener.document.formulario.grabaiva1.style.display = 'inherit';
+
+         }
+         else {
+
+         parent.opener.document.formulario.ivaporc1.value = 0;
+         parent.opener.document.formulario.grabaiva1.style.display = 'none';
+         }
+         parent.opener.document.formulario.transformacion1.value = transformacion;
+         parent.opener.document.formulario.precio_con_iva1.value = precio_con_iva;
+         parent.opener.activar_subgrupo('bodegas.php?idproducto=' + idarticulo, 'cbobodega1');
+
+
+         //password = prompt("Producto sin STOCK en bodega.\n\nPara permitira su seleccion\nIngrese el password ", '');
+         parent.opener.actualizar_importe();
+         */
+        parent.window.close();
+
     }
 
 
@@ -1046,12 +286,10 @@ $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
 
                 <thead>
                 <tr>
-                    <!--                                        <th><span style="font-size: 10px">Codigo</span></th>-->
-                    <th width="70%"><span style="font-size: 12px">Nombre</span></th>
+                    <th width="1%"><span style="font-size: 12px">Barras</span></th>
+                    <th width="69%"><span style="font-size: 12px">Nombre</span></th>
                     <th width="10%"><span style="font-size: 12px">Stock</span></th>
-
                     <th width="10%"><span style="font-size: 12px">Pvp</span></th>
-                    <!--                                        <th ><span style="font-size: 10px">Exp</span></th>                                        -->
                     <th width="5%"><span style="font-size: 12px">&nbsp;</span></th>
                 </tr>
                 </thead>

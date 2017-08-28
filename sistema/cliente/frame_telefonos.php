@@ -36,7 +36,7 @@ $retorno=0;
 				
 
 				$sel_insert="INSERT INTO clientefonotmp (idcliente,numfono,numero,descripcion,operadora)
-                                            VALUES ('$codclientetmp','','$numero','$descripcion','$operadora')";
+                                            VALUES ('$codclientetmp',null,'$numero','$descripcion','$operadora')";
 				$rs_insert=mysql_query($sel_insert, $conn);
 
 		}

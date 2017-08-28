@@ -46,7 +46,7 @@ if ($modif<>1) {
 				
 
 				$sel_insert="INSERT INTO clientefono (id_telefono,id_cliente,numero,descripcion,operadora)
-                                            VALUES ('','$idcliente','$numero','$descripcion','$operadora')";
+                                            VALUES (null,'$idcliente','$numero','$descripcion','$operadora')";
 				$rs_insert=mysql_query($sel_insert, $conn);
 
 		}

@@ -80,10 +80,28 @@ function guardar_facturero(idruc)
 
 </script>
 <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
-<link href="../calendario/calendar-blue.css" rel="stylesheet" type="text/css">
-<script type="text/JavaScript" language="javascript" src="../calendario/calendar.js"></script>
-<script type="text/JavaScript" language="javascript" src="../calendario/lang/calendar-sp.js"></script>
-<script type="text/JavaScript" language="javascript" src="../calendario/calendar-setup.js"></script>
+    <!-- INICIO ARCHIVOS CALENDARIO -->
+    <link rel="stylesheet" href="../css/jquery-ui.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.min.css"/>
+    <script src="../js/jquery-1.12.4.js"></script>
+    <script src="../js/1.12.1_jquery-ui..js"></script>
+
+    <script language="javascript">
+        $(function () {
+            $("#fecha_caducidad").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                showOn: "button",
+                buttonImage: "../img/calendario.png",
+                buttonImageOnly: true,
+                buttonText: "Seleccionar Fecha"
+            });
+        });
+    </script>
+    <!-- FIN ARCHIVOS CALENDARIO -->
 
 <script type="text/javascript" src="../js/validar.js"></script>
 <script type="text/javascript" src="../js/fechas.js"></script>
@@ -157,16 +175,10 @@ body {
                 
                 <tr>
                     <td >Fecha Vencto.:</td>
-                    <td ><input NAME="fecha_caducidad" value="<?php  echo implota(mysql_result($rs_f,0,"fecha_caducidad"));?>" type="text" class="cajaPequena" id="fecha_caducidad" size="10" maxlength="10"  readonly> <img src="../img/calendario.png" name="Image1" id="Image1" width="16" height="16" border="0" id="Image1" onMouseOver="this.style.cursor = 'pointer'">
-                        <script type="text/javascript">
-                            Calendar.setup(
-                                    {
-                                        inputField: "fecha_caducidad",
-                                        ifFormat: "%d/%m/%Y",
-                                        button: "Image1"
-                                    }
-                            );
-                        </script>
+                    <td >
+
+                        <input type="text" class="cajaPequena" id="fecha_caducidad" name="fecha_caducidad" value="<?php echo implota(mysql_result($rs_f,0,"fecha_caducidad"));?>" readonly>
+                        
                     </td>                                    
                 </tr>
                 

@@ -1,5 +1,8 @@
-﻿<?php 
-
+﻿<?php
+//get datos SESSION
+session_start();
+$id_bodega = $_SESSION['id_bodega'];
+//*********************************************************************
 
 include("../conexion/conexion.php");
 error_reporting(0);
@@ -12,12 +15,24 @@ $rs_iva = mysql_query($sel_iva, $conn);
 $ivaporcetaje = mysql_result($rs_iva, 0, "porcentaje");
 //**********************************************************************
 
+//numero items parametrizable*****************************************
+$sel_items = "select item FROM param_item where borrado=0";
+$rs_items = mysql_query($sel_items, $conn);
+$totalitems = mysql_result($rs_items, 0, "item");
+//**********************************************************************
+
 $fechahoy = date("Y-m-d");
 
 $idruc = 1;
-/* $sel_fact="INSERT INTO facturastmp (codfactura,fecha) VALUE ('','$fechahoy')";
-  $rs_fact=mysql_query($sel_fact, $conn);
-  $codfacturatmp=mysql_insert_id(); */
+
+//tabla temporal articulos**********************************************************************************************
+$sel_fact = "INSERT INTO facturastmp (codfactura,fecha) VALUE (null,'$fechahoy')";
+$rs_fact = mysql_query($sel_fact, $conn);
+$codfacturatmp = mysql_insert_id();
+
+$query = "DELETE FROM factulineaptmp WHERE codtmp='$codfacturatmp'";
+$rs = mysql_query($query, $conn);
+//**********************************************************************************************************************
 
 
 //datos factureros existentes
@@ -44,6 +59,7 @@ $fecha_caducidad = mysql_result($rs_facturero, 0, "fecha_caducidad");
 $sel_max = "SELECT max(codigo_factura)as maximo FROM facturas WHERE id_facturero = $idfacturero_seleccionado";
 $rs_max = mysql_query($sel_max, $conn);
 $maximo = mysql_result($rs_max, 0, "maximo");
+
 if (($maximo == 0) || ($maximo < $inicio)) {
 
     $maximo = $inicio;
@@ -63,6 +79,12 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 }
 
 
+//AJAX data table edit ********************
+require_once("ajax_table.class.php");
+$obj = new ajax_table();
+$records = array();
+//************************************
+
 ?>
 
 
@@ -70,11 +92,84 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 <head>
     <title>Principal</title>
     <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
-    <link href="../calendario/calendar-blue.css" rel="stylesheet" type="text/css">
-    <script type="text/JavaScript" language="javascript" src="../calendario/calendar.js"></script>
-    <script type="text/JavaScript" language="javascript" src="../calendario/lang/calendar-sp.js"></script>
-    <script type="text/JavaScript" language="javascript" src="../calendario/calendar-setup.js"></script>
     <script type="text/JavaScript" language="javascript" src="js/articulos_factura.js"></script>
+    <!-- INICIO ARCHIVOS CALENDARIO -->
+    <link rel="stylesheet" href="../css/jquery-ui.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.min.css"/>
+    <script src="../js/jquery-1.12.4.js"></script>
+    <script src="../js/1.12.1_jquery-ui..js"></script>
+
+    <script language="javascript">
+        $(function () {
+            $("#fecha").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                showOn: "button",
+                buttonImage: "../img/calendario.png",
+                buttonImageOnly: true,
+                buttonText: "Seleccionar Fecha"
+            });
+        });
+    </script>
+    <!-- FIN ARCHIVOS CALENDARIO -->
+
+    <!-- INICIO AJAX EDIT DATA TABLE -->
+    <script>
+        // Column names must be identical to the actual column names in the database, if you dont want to reveal the column names, you can map them with the different names at the server side.
+
+        localStorage.clear();
+
+        localStorage.setItem('codtmp', <?php echo $codfacturatmp;?>);
+        localStorage.setItem('id_bodega',<?php echo $id_bodega;?>);
+        localStorage.setItem('iva_porcentaje',<?php echo $ivaporcetaje;?>);
+
+        localStorage.setItem('descuento', '1');
+        localStorage.setItem('descuento', '1');
+        localStorage.setItem('itemstotal', <?php echo $totalitems;?>);
+        localStorage.setItem('totalrecord', '0');
+
+        var columns = new Array("dproducto", "cantidad", "precio", "dcto", "importe", "iva", "id_bodega", "codtmp", "id_articulo", "costo");
+        var columns_edit = new Array("cantidad", "precio", "dcto", "importe", "iva");
+        var columns_totales = new Array("baseimponible", "iva0", "iva12", "importeiva", "descuentototal", "preciototal", "preciototal_c");
+        var placeholder = new Array("Producto", "Cantidad", "$ 0.00", "Dcto.", "SubTotal", "Imp IVA", "id_bodega", "codtmp", "id_articulo", "costo");
+        var inputType = new Array("text", "text", "text", "text", "text", "text", "hidden", "hidden", "hidden", "hidden");
+        var table = "tableDemo";
+
+
+        // Set button class names
+        var savebutton = "ajaxSave";
+        var deletebutton = "ajaxDelete";
+        var editbutton = "ajaxEdit";
+        var updatebutton = "ajaxUpdate";
+        var cancelbutton = "cancel";
+
+        var saveImage = "images/save.png"
+        var editImage = "images/edit.png"
+        var deleteImage = "images/remove.png"
+        var cancelImage = "images/back.png"
+        var updateImage = "images/save.png"
+
+        // Set highlight animation delay (higher the value longer will be the animation)
+        //var saveAnimationDelay = 3000;
+        //var deleteAnimationDelay = 1000;
+        var saveAnimationDelay = 100;
+        var deleteAnimationDelay = 100;
+
+        // 2 effects available available 1) slide 2) flash
+        var effect = "flash";
+
+
+    </script>
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- FIN  AJAX EDIT DATA TABLE -->
+
+
     <script language="javascript">
         var cursor;
         var idf;
@@ -90,7 +185,7 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 
         function inicio(aceptacion, mensaje) {
             if (aceptacion == 0) {
-                alert(mensaje);
+                alert(mensaje+ " max: " +<?php echo $idfacturero_seleccionado?>);
                 location.href = "index.php";
             }
         }
@@ -144,199 +239,23 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
         }
 
 
-
         function removeOptionss(obj) {
             while (obj.options.length) {
                 obj.remove(0);
             }
         }
 
-        function limpiar_articulo(op){
-            switch (op) {
-                case 1:
-                    removeOptionss(document.getElementById("series1"));
-                    //document.getElementById("codarticulo1").value = "";
-                    document.getElementById("descripcion1").value = "";
-                    document.getElementById("cantidad1").value = 1;
-                     document.getElementById("precio1").value = "";
-                     document.getElementById("importe1").value = 0;
-                     document.getElementById("descuentoporc1").value = 0;
-                     document.getElementById("descuento1").value = 0;
-                     document.getElementById("ivaporc1").value = 0;
-                     document.getElementById("iva1").value = 0;
-                     document.getElementById("subt1").value = 0;
-                     document.getElementById("idarticulo1").value = "";
-                     document.getElementById("costo1").value = "";
+        function limpiar_articulo(op) {
 
-
-                    break;
-                case 2:
-                    removeOptionss(document.getElementById("series2"));
-                    //document.getElementById("codarticulo2").value = "";
-                    document.getElementById("descripcion2").value = "";
-                    document.getElementById("cantidad2").value = 1;
-                    document.getElementById("precio2").value = "";
-                    document.getElementById("importe2").value = 0;
-                    document.getElementById("descuentoporc2").value = 0;
-                    document.getElementById("descuento2").value = 0;
-                    document.getElementById("ivaporc2").value = 0;
-                    document.getElementById("iva2").value = 0;
-                    document.getElementById("subt2").value = 0;
-                    document.getElementById("idarticulo2").value = "";
-                    document.getElementById("costo2").value = "";
-
-                    break;
-                case 3:
-                    removeOptionss(document.getElementById("series3"));
-                    //document.getElementById("codarticulo3").value = "";
-                    document.getElementById("descripcion3").value = "";
-                    document.getElementById("cantidad3").value = 1;
-                    document.getElementById("precio3").value = "";
-                    document.getElementById("importe3").value = 0;
-                    document.getElementById("descuentoporc3").value = 0;
-                    document.getElementById("descuento3").value = 0;
-                    document.getElementById("ivaporc3").value = 0;
-                    document.getElementById("iva3").value = 0;
-                    document.getElementById("subt3").value = 0;
-                    document.getElementById("idarticulo3").value = "";
-                    document.getElementById("costo3").value = "";
-
-                    break;
-                case 4:
-                    removeOptionss(document.getElementById("series4"));
-                    //document.getElementById("codarticulo4").value = "";
-                    document.getElementById("descripcion4").value = "";
-                    document.getElementById("cantidad4").value = 1;
-                    document.getElementById("precio4").value = "";
-                    document.getElementById("importe4").value = 0;
-                    document.getElementById("descuentoporc4").value = 0;
-                    document.getElementById("descuento4").value = 0;
-                    document.getElementById("ivaporc4").value = 0;
-                    document.getElementById("iva4").value = 0;
-                    document.getElementById("subt4").value = 0;
-                    document.getElementById("idarticulo4").value = "";
-                    document.getElementById("costo4").value = "";
-
-                    break;
-                case 5:
-                    removeOptionss(document.getElementById("series5"));
-                    //document.getElementById("codarticulo5").value = "";
-                    document.getElementById("descripcion5").value = "";
-                    document.getElementById("cantidad5").value = 1;
-                    document.getElementById("precio5").value = "";
-                    document.getElementById("importe5").value = 0;
-                    document.getElementById("descuentoporc5").value = 0;
-                    document.getElementById("descuento5").value = 0;
-                    document.getElementById("ivaporc5").value = 0;
-                    document.getElementById("iva5").value = 0;
-                    document.getElementById("subt5").value = 0;
-                    document.getElementById("idarticulo5").value = "";
-                    document.getElementById("costo5").value = "";
-
-                    break;
-                case 6:
-                    removeOptionss(document.getElementById("series6"));
-                    //document.getElementById("codarticulo6").value = "";
-                    document.getElementById("descripcion6").value = "";
-                    document.getElementById("cantidad6").value = 1;
-                    document.getElementById("precio6").value = "";
-                    document.getElementById("importe6").value = 0;
-                    document.getElementById("descuentoporc6").value = 0;
-                    document.getElementById("descuento6").value = 0;
-                    document.getElementById("ivaporc6").value = 0;
-                    document.getElementById("iva6").value = 0;
-                    document.getElementById("subt6").value = 0;
-                    document.getElementById("idarticulo6").value = "";
-                    document.getElementById("costo6").value = "";
-
-                    break;
-                case 7:
-                    removeOptionss(document.getElementById("series7"));
-                    //document.getElementById("codarticulo7").value = "";
-                    document.getElementById("descripcion7").value = "";
-                    document.getElementById("cantidad7").value = 1;
-                    document.getElementById("precio7").value = "";
-                    document.getElementById("importe7").value = 0;
-                    document.getElementById("descuentoporc7").value = 0;
-                    document.getElementById("descuento7").value = 0;
-                    document.getElementById("ivaporc7").value = 0;
-                    document.getElementById("iva7").value = 0;
-                    document.getElementById("subt7").value = 0;
-                    document.getElementById("idarticulo7").value = "";
-                    document.getElementById("costo7").value = "";
-
-                    break;
-                case 8:
-                    removeOptionss(document.getElementById("series8"));
-                    //document.getElementById("codarticulo8").value = "";
-                    document.getElementById("descripcion8").value = "";
-                    document.getElementById("cantidad8").value = 1;
-                    document.getElementById("precio8").value = "";
-                    document.getElementById("importe8").value = 0;
-                    document.getElementById("descuentoporc8").value = 0;
-                    document.getElementById("descuento8").value = 0;
-                    document.getElementById("ivaporc8").value = 0;
-                    document.getElementById("iva8").value = 0;
-                    document.getElementById("subt8").value = 0;
-                    document.getElementById("idarticulo8").value = "";
-                    document.getElementById("costo8").value = "";
-
-                    break;
-                case 9:
-                    removeOptionss(document.getElementById("series9"));
-                    //document.getElementById("codarticulo9").value = "";
-                    document.getElementById("descripcion9").value = "";
-                    document.getElementById("cantidad9").value = 1;
-                    document.getElementById("precio9").value = "";
-                    document.getElementById("importe9").value = 0;
-                    document.getElementById("descuentoporc9").value = 0;
-                    document.getElementById("descuento9").value = 0;
-                    document.getElementById("ivaporc9").value = 0;
-                    document.getElementById("iva9").value = 0;
-                    document.getElementById("subt9").value = 0;
-                    document.getElementById("idarticulo9").value = "";
-                    document.getElementById("costo9").value = "";
-
-                    break;
-                case 10:
-                    removeOptionss(document.getElementById("series10"));
-                    //document.getElementById("codarticulo10").value = "";
-                    document.getElementById("descripcion10").value = "";
-                    document.getElementById("cantidad10").value = 1;
-                    document.getElementById("precio10").value = "";
-                    document.getElementById("importe10").value = 0;
-                    document.getElementById("descuentoporc10").value = 0;
-                    document.getElementById("descuento10").value = 0;
-                    document.getElementById("ivaporc10").value = 0;
-                    document.getElementById("iva10").value = 0;
-                    document.getElementById("subt10").value = 0;
-                    document.getElementById("idarticulo10").value = "";
-                    document.getElementById("costo10").value = "";
-
-                    break;
-                case 11:
-                    removeOptionss(document.getElementById("series11"));
-                    //document.getElementById("codarticulo11").value = "";
-                    document.getElementById("descripcion11").value = "";
-                    document.getElementById("cantidad11").value = 1;
-                    document.getElementById("precio11").value = "";
-                    document.getElementById("importe11").value = 0;
-                    document.getElementById("descuentoporc11").value = 0;
-                    document.getElementById("descuento11").value = 0;
-                    document.getElementById("ivaporc11").value = 0;
-                    document.getElementById("iva11").value = 0;
-                    document.getElementById("subt11").value = 0;
-                    document.getElementById("idarticulo11").value = "";
-                    document.getElementById("costo11").value = "";
-
-                    break;
-
-            }
             actualizar_totales();
+        }
+
+        function temporal(){
+           
         }
     </script>
 </head>
-<body onload="inicio('<?php  echo $aceptacion ?>', '<?php  echo $mensaje_aceptacion ?>')">
+<body onload="inicio('<?php echo $aceptacion ?>', '<?php echo $mensaje_aceptacion ?>')">
 <div id="pagina">
     <div id="zonaContenido">
         <div align="center">
@@ -361,21 +280,21 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
                             <td>
                                 <select id="facturero" class="comboMedio" NAME="facturero"
                                         onchange="cambio_facturero()">
-                                    <?php 
+                                    <?php
                                     $contador = 0;
                                     while ($contador < mysql_num_rows($res_o)) {
                                         if (mysql_result($res_o, $contador, "id_facturero") == $idfacturero_seleccionado) {
                                             ?>
                                             <option selected
-                                                    value="<?php  echo mysql_result($res_o, $contador, "id_facturero") ?>"><?php  echo mysql_result($res_o, $contador, "serie1") . '-' . mysql_result($res_o, $contador, "serie2") ?></option>
+                                                    value="<?php echo mysql_result($res_o, $contador, "id_facturero") ?>"><?php echo mysql_result($res_o, $contador, "serie1") . '-' . mysql_result($res_o, $contador, "serie2") ?></option>
 
 
-                                        <?php  } else {
+                                        <?php } else {
                                             if ($tipo == "administrador") {
                                                 ?>
                                                 <option
-                                                    value="<?php  echo mysql_result($res_o, $contador, "id_facturero") ?>"><?php  echo mysql_result($res_o, $contador, "serie1") . '-' . mysql_result($res_o, $contador, "serie2") ?></option>
-                                            <?php  }
+                                                    value="<?php echo mysql_result($res_o, $contador, "id_facturero") ?>"><?php echo mysql_result($res_o, $contador, "serie1") . '-' . mysql_result($res_o, $contador, "serie2") ?></option>
+                                            <?php }
                                         }
                                         $contador++;
                                     } ?>
@@ -389,12 +308,14 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 
                             <td>CI/RUC</td>
                             <td colspan="3"><input NAME="ci_ruc" type="text" class="cajaMedia" id="ci_ruc" size="20"
-                                                   maxlength="15" readonly></td>
+                                                   maxlength="15" readonly>
+
+                            </td>
 
                             <td rowspan="2"><b>FACTURA</b></td>
                             <td rowspan="2">
                                 <input NAME="codfactura" type="text" class="cajaMinimaFactura" id="codfactura"
-                                       value="<?php  echo $maximo ?>">
+                                       value="<?php echo $maximo ?>">
                             </td>
                         </tr>
                         <tr>
@@ -416,23 +337,13 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 
                         </tr>
 
-                        <?php  $hoy = date("d/m/Y"); ?>
+
                         <tr>
-                            <td>Fecha</td>
-                            <td><input NAME="fecha" type="text" class="cajaPequena" id="fecha" size="10" maxlength="10"
-                                       value="<?php  echo $hoy ?>" readonly> <img src="../img/calendario.png"
-                                                                                 name="Image1" id="Image1" width="16"
-                                                                                 height="16" border="0" id="Image1"
-                                                                                 onMouseOver="this.style.cursor = 'pointer'">
-                                <script type="text/javascript">
-                                    Calendar.setup(
-                                        {
-                                            inputField: "fecha",
-                                            ifFormat: "%d/%m/%Y",
-                                            button: "Image1"
-                                        }
-                                    );
-                                </script>
+
+                            <td width="15%" align="left">Fecha:</td>
+                            <td width="43%">
+
+                                <input type="text" id="fecha" name="fecha" value="<?php echo date("d/m/Y") ?>" readonly>
                             </td>
 
 
@@ -440,9 +351,9 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
                             <td>
                                 <select name="cbocredito" id="cbocredito" class="comboPequeno"
                                         onchange="activar_plazo(this.selectedIndex)">
-                                    <option value="0">No</option>
+                                    <option value="0" selected>No</option>
                                     <option value="1">Si</option>
-                                    <option value="2" selected></option>
+                                    <option value="2"></option>
                                 </select>
 
                                 <select name="cboplazo" id="cboplazo" class="comboPequeno" readonly="true">
@@ -468,14 +379,11 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
                     </table>
             </div>
 
-            <input NAME="serie1" type="hidden" id="serie1" value="<?php  echo $serie1 ?>">
-            <input NAME="serie2" type="hidden" id="serie2" value="<?php  echo $serie2 ?>">
-            <input NAME="autorizacion" type="hidden" id="autorizacion" value="<?php  echo $autorizacion ?>">
-            <input name="idfact" id="idfact" type="hidden" value="<?php  echo $idfacturero_seleccionado ?>">
-            <!--
-
-            <input id="accion" name="accion" value="alta" type="hidden">-->
-            <!-- </form>-->
+            <input NAME="serie1" type="hidden" id="serie1" value="<?php echo $serie1 ?>">
+            <input NAME="serie2" type="hidden" id="serie2" value="<?php echo $serie2 ?>">
+            <input NAME="autorizacion" type="hidden" id="autorizacion" value="<?php echo $autorizacion ?>">
+            <input name="idfact" id="idfact" type="hidden" value="<?php echo $idfacturero_seleccionado ?>">
+            <input id="codfacturatmp" name="codfacturatmp" value="<?php echo $codfacturatmp ?>" type="hidden">
 
 
             <br>
@@ -534,10 +442,69 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
                                         <td>ADVERTENCIA! DEUDOR</td>
 
                                         <td><textarea id="facturasCadena" name="facturasCadena" cols="40" rows="3"
-                                                      readonly="true"><?php  echo $debe ?></textarea></td>
+                                                      readonly="true"><?php echo $debe ?></textarea></td>
                                     </tr>
                                 </table>
                             </td>
+
+
+                            <td rowspan="2">
+                                <b>TOTAL</b><br/>
+                                <input class="cajaMinimaTotalFactura" name="preciototal_c" type="text"
+                                       id="preciototal_c" size="12"
+                                       align="right" value=0 readonly>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0>
+                        <tr>
+                            <td style=" text-align: center; background-color: skyblue">
+                                DESCUENTO GENERAL
+                            </td>
+                            <td>
+                                <table class="fuente8" width="80%" cellspacing=0 cellpadding=3 border=0>
+                                    <tr>
+                                        <td>
+                                            <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
+                                                   id="tipo_precio" value="1" checked>PVP A</br>
+
+                                            <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
+                                                   id="tipo_precio" value="2">PVP B</br>
+                                        </td>
+                                        <td>
+                                            <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
+                                                   id="tipo_precio" value="3">PVP C</br>
+
+                                            <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
+                                                   id="tipo_precio" value="4">PVP D</br>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                            <td style=" text-align: center; background-color: lightgreen">
+                                FORMA DE PAGO
+                            </td>
+                            <td>
+                                <table class="fuente8" width="80%" cellspacing=0 cellpadding=3 border=0>
+                                    <tr>
+                                        <td>
+                                            <input onchange="onChangeDescuento()" type="radio" name="forma_pago"
+                                                   id="forma_pago" value="1" checked>EFECTIVO</br>
+
+                                            <input onchange="onChangeDescuento()" type="radio" name="forma_pago"
+                                                   id="forma_pago" value="5">TARJETA DE
+                                            CREDITO</br>
+                                        </td>
+                                        <td>
+                                            <input onchange="onChangeDescuento()" type="radio" name="forma_pago"
+                                                   id="forma_pago" value="100">OTROS</br>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+
                         </tr>
                     </table>
                 </div>
@@ -549,647 +516,59 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 
             <div id="frmBusqueda">
                 <!--	<form id="formulario_lineas" name="formulario_lineas" method="post" action="frame_lineas.php" target="frame_lineas">-->
-                <div id="tituloForm" class="header">PRODUCTOS</div>
-                <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=1>
-                    <tr class="cabeceraTabla">
-                        <td width="21%">COD</td>
-                        <td width="35%">DESCRIPCION</td>
-                        <td width="5%">BODEGA</td>
-                        <td width="5%">CANT</td>
-                        <td width="5%">PRECIO &#36;</td>
+                <div id="tituloForm" class="header">PRODUCTOS (doble click para editar)</div>
 
-                        <td width="10%">DCTO</td>
 
-                        <td width="5%">SUBT. &#36;</td>
-                        <td width="4%">&nbsp;</td>
-                    </tr>
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 1 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-
-                            <select name="series1[]" id="series1" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(1)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion1" id="descripcion1" type="text" class="cajaExtraGrande"
-                                   onClick="ventanaArticulos(1)" readonly>
-                            <input style="display: none" name="grabaiva1" id="grabaiva1" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-                        <td align="center">
-                            <select name="cbobodega1" id="cbobodega1" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad1" id="cantidad1" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(1)">
-                        </td>
-                        <td align="center"><input NAME="precio1" id="precio1" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(1)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc1" id="descuentoporc1" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(1)" value="0">%
-                            <input NAME="descuento1" id="descuento1" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(1)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt1" id="subt1" type="text" class="cajaPequena2" value="0"
-                                                  readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="aaaa()" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
+                <table border="0" class="tableDemo bordered" style="font-size: 10px">
+                    <thead>
+                    <tr class="ajaxTitle">
+                        <th width="2%">#</th>
+                        <th width="40%">Producto</th>
+                        <th width="11%">Cantidad</th>
+                        <th width="11%">Precio $ <label id="tipo_pvp"></label></th>
+                        <th width="11%">Descuento</th>
+                        <th width="11%">SubTotal &#36;</th>
+                        <th width="11%">IVA <?php echo $ivaporcetaje ?>%</th>
+                        <th width="10%">Action</th>
                     </tr>
 
-                    <input NAME="importe1" id="importe1" type="hidden" value="0">
-                    <input NAME="ivaporc1" id="ivaporc1" type="hidden" onChange="suma_iva(1)">
-                    <input NAME="iva1" id="iva1" type="hidden" value="0">
+                    </thead>
+                    <?php
+                    if (count($records)) {
+                        //$i = 1;
+                        $i = count($records);
+                        foreach ($records as $key => $eachRecord) {
+                            ?>
+                            <tr id="<?php echo $eachRecord['numlinea']; ?>">
+                                <td width="2%"><?php echo $i--; ?></td>
+                                <td width="45%" class="fname"><?php echo $eachRecord['dproducto']; ?></td>
+                                <td width="10%" class="lname"><?php echo $eachRecord['cantidad']; ?> </td>
+                                <td width="10%" class="tech"><?php echo $eachRecord['precio']; ?></td>
+                                <td width="10%" class="email"><?php echo $eachRecord['descuento']; ?></td>
+                                <td width="10%" class="address"><?php echo $eachRecord['subtotal']; ?></td>
+                                <td width="10%">
+
+                                    <a href="javascript:;" id="<?php echo $eachRecord['id']; ?>" class="ajaxDelete"><img
+                                            src=""
+                                            class="dimage"></a>
+
+
+                                </td>
+                            </tr>
+                        <?php }
+                    }
+                    ?>
 
-                    <input name="idarticulo1" id="idarticulo1" type="hidden">
-                    <input name="costo1" id="costo1" type="hidden">
-                    <input name="stock1" id="stock1" type="hidden">
-
-                    <input name="transformacion1" id="transformacion1" type="hidden">
-                    <input name="precio_con_iva1" id="precio_con_iva1" type="hidden">
-                    <input name="importe_con_iva1" id="importe_con_iva1" type="hidden">
-                    <!--FIN ITEM No. 1 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 2 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemParTabla">
-                        <td>
-                            <select name="series2[]" id="series2" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(2)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion2" id="descripcion2" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(2)" readonly>
-                            <input style="display: none" name="grabaiva2" id="grabaiva2" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega2" id="cbobodega2" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad2" id="cantidad2" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(2)">
-                        </td>
-                        <td align="center"><input NAME="precio2" id="precio2" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(2)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc2" id="descuentoporc2" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(2)" value="0">%
-                            <input NAME="descuento2" id="descuento2" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(2)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt2" id="subt2" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(2)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(2)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe2" id="importe2" type="hidden" value="0">
-                    <input NAME="ivaporc2" id="ivaporc2" type="hidden" onChange="suma_iva(2)">
-                    <input NAME="iva2" id="iva2" type="hidden" value="0">
-
-                    <input name="idarticulo2" id="idarticulo2" type="hidden">
-                    <input name="costo2" id="costo2" type="hidden">
-                    <input name="stock2" id="stock2" type="hidden">
-
-                    <input name="transformacion2" id="transformacion2" type="hidden">
-                    <input name="precio_con_iva2" id="precio_con_iva2" type="hidden">
-                    <input name="importe_con_iva2" id="importe_con_iva2" type="hidden">
-                    <!--FIN ITEM No. 2 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 3 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-                            <select name="series3[]" id="series3" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(3)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion3" id="descripcion3" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(3)" readonly>
-                            <input style="display: none" name="grabaiva3" id="grabaiva3" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega3" id="cbobodega3" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad3" id="cantidad3" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(3)">
-                        </td>
-                        <td align="center"><input NAME="precio3" id="precio3" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(3)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc3" id="descuentoporc3" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(3)" value="0">%
-                            <input NAME="descuento3" id="descuento3" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(3)">&#36;
-                        </td>
-                        <td align="center"><input NAME="subt3" id="subt3" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(3)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(3)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-
-                    <input NAME="importe3" id="importe3" type="hidden" value="0">
-                    <input NAME="ivaporc3" id="ivaporc3" type="hidden" onChange="suma_iva(3)">
-                    <input NAME="iva3" id="iva3" type="hidden" value="0">
-
-                    <input name="idarticulo3" id="idarticulo3" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo3" id="costo3" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock3" id="stock3" type="hidden">
-
-                    <input name="transformacion3" id="transformacion3" type="hidden">
-                    <input name="precio_con_iva3" id="precio_con_iva3" type="hidden">
-                    <input name="importe_con_iva3" id="importe_con_iva3" type="hidden">
-                    <!--FIN ITEM No. 3 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 4 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemParTabla">
-                        <td>
-                            <select name="series4[]" id="series4" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(4)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion4" id="descripcion4" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(4)" readonly>
-                            <input style="display: none" name="grabaiva4" id="grabaiva4" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega4" id="cbobodega4" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad4" id="cantidad4" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(4)">
-                        </td>
-                        <td align="center"><input NAME="precio4" id="precio4" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(4)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc4" id="descuentoporc4" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(4)" value="0">%
-                            <input NAME="descuento4" id="descuento4" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(4)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt4" id="subt4" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(4)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(4)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe4" id="importe4" type="hidden" value="0">
-                    <input NAME="ivaporc4" id="ivaporc4" type="hidden" onChange="suma_iva(4)">
-                    <input NAME="iva4" id="iva4" type="hidden" value="0">
-
-                    <input name="idarticulo4" id="idarticulo4" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo4" id="costo4" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock4" id="stock4" type="hidden">
-
-                    <input name="transformacion4" id="transformacion4" type="hidden">
-                    <input name="precio_con_iva4" id="precio_con_iva4" type="hidden">
-                    <input name="importe_con_iva4" id="importe_con_iva4" type="hidden">
-                    <!--FIN ITEM No. 4 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 5 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-                            <select name="series5[]" id="series5" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(5)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion5" id="descripcion5" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(5)" readonly>
-                            <input style="display: none" name="grabaiva5" id="grabaiva5" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega5" id="cbobodega5" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad5" id="cantidad5" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(5)">
-                        </td>
-                        <td align="center"><input NAME="precio5" id="precio5" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(5)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc5" id="descuentoporc5" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(5)" value="0">%
-                            <input NAME="descuento5" id="descuento5" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(5)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt5" id="subt5" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(5)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(5)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe5" id="importe5" type="hidden" value="0">
-                    <input NAME="ivaporc5" id="ivaporc5" type="hidden" onChange="suma_iva(5)">
-                    <input NAME="iva5" id="iva5" type="hidden" value="0">
-
-                    <input name="idarticulo5" id="idarticulo5" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo5" id="costo5" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock5" id="stock5" type="hidden">
-
-                    <input name="transformacion5" id="transformacion5" type="hidden">
-                    <input name="precio_con_iva5" id="precio_con_iva5" type="hidden">
-                    <input name="importe_con_iva5" id="importe_con_iva5" type="hidden">
-                    <!--FIN ITEM No. 5 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 6 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemParTabla">
-                        <td>
-                            <select name="series6[]" id="series6" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(6)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion6" id="descripcion6" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(6)" readonly>
-                            <input style="display: none" name="grabaiva6" id="grabaiva6" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega6" id="cbobodega6" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad6" id="cantidad6" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(6)">
-                        </td>
-                        <td align="center"><input NAME="precio6" id="precio6" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(6)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc6" id="descuentoporc6" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(6)" value="0">%
-                            <input NAME="descuento6" id="descuento6" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(6)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt6" id="subt6" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(6)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(6)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe6" id="importe6" type="hidden" value="0">
-                    <input NAME="ivaporc6" id="ivaporc6" type="hidden" onChange="suma_iva(6)">
-                    <input NAME="iva6" id="iva6" type="hidden" value="0">
-
-                    <input name="idarticulo6" id="idarticulo6" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo6" id="costo6" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock6" id="stock6" type="hidden">
-
-                    <input name="transformacion6" id="transformacion6" type="hidden">
-                    <input name="precio_con_iva6" id="precio_con_iva6" type="hidden">
-                    <input name="importe_con_iva6" id="importe_con_iva6" type="hidden">
-                    <!--FIN ITEM No. 6 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 7 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-                            <select name="series7[]" id="series7" size="3" style="width: 100%" multiple="multiple">
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(7)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion7" id="descripcion7" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(7)" readonly>
-                            <input style="display: none" name="grabaiva7" id="grabaiva7" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega7" id="cbobodega7" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad7" id="cantidad7" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(7)">
-                        </td>
-                        <td align="center"><input NAME="precio7" id="precio7" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(7)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc7" id="descuentoporc7" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(7)" value="0">%
-                            <input NAME="descuento7" id="descuento7" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(7)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt7" id="subt7" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(7)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(7)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe7" id="importe7" type="hidden" value="0">
-                    <input NAME="ivaporc7" id="ivaporc7" type="hidden" onChange="suma_iva(7)">
-                    <input NAME="iva7" id="iva7" type="hidden" value="0">
-
-                    <input name="idarticulo7" id="idarticulo7" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo7" id="costo7" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock7" id="stock7" type="hidden">
-
-                    <input name="transformacion7" id="transformacion7" type="hidden">
-                    <input name="precio_con_iva7" id="precio_con_iva7" type="hidden">
-                    <input name="importe_con_iva7" id="importe_con_iva7" type="hidden">
-                    <!--FIN ITEM No. 7 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 8 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemParTabla">
-                        <td>
-                            <select name="series8[]" id="series8" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(8)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion8" id="descripcion8" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(8)" readonly>
-                            <input style="display: none" name="grabaiva8" id="grabaiva8" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega8" id="cbobodega8" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad8" id="cantidad8" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(8)">
-                        </td>
-                        <td align="center"><input NAME="precio8" id="precio8" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(8)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc8" id="descuentoporc8" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(8)" value="0">%
-                            <input NAME="descuento8" id="descuento8" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(8)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt8" id="subt8" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(8)" readonly></td>
-                        <td width="4%" align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                           onClick="limpiar_articulo(8)"
-                                                           onMouseOver="style.cursor = cursor" title="Eliminar"></td>
-                    </tr>
-
-
-                    <input NAME="importe8" id="importe8" type="hidden" value="0">
-                    <input NAME="ivaporc8" id="ivaporc8" type="hidden" onChange="suma_iva(8)">
-                    <input NAME="iva8" id="iva8" type="hidden" value="0">
-
-                    <input name="idarticulo8" id="idarticulo8" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo8" id="costo8" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock8" id="stock8" type="hidden">
-
-                    <input name="transformacion8" id="transformacion8" type="hidden">
-                    <input name="precio_con_iva8" id="precio_con_iva8" type="hidden">
-                    <input name="importe_con_iva8" id="importe_con_iva8" type="hidden">
-                    <!--FIN ITEM No. 8 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 9 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-                            <select name="series9[]" id="series9" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(9)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion9" id="descripcion9" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(9)" readonly>
-                            <input style="display: none" name="grabaiva9" id="grabaiva9" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega9" id="cbobodega9" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad9" id="cantidad9" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(9)">
-                        </td>
-                        <td align="center"><input NAME="precio9" id="precio9" type="text" class="cajaPequena2" size="10"
-                                                  maxlength="10" onChange="actualizar_importe(9)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc9" id="descuentoporc9" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(9)" value="0">%
-                            <input NAME="descuento9" id="descuento9" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(9)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt9" id="subt9" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(9)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(9)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe9" id="importe9" type="hidden" value="0">
-                    <input NAME="ivaporc9" id="ivaporc9" type="hidden" onChange="suma_iva(9)">
-                    <input NAME="iva9" id="iva9" type="hidden" value="0">
-
-                    <input name="idarticulo9" id="idarticulo9" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo9" id="costo9" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock9" id="stock9" type="hidden">
-
-                    <input name="transformacion9" id="transformacion9" type="hidden">
-                    <input name="precio_con_iva9" id="precio_con_iva9" type="hidden">
-                    <input name="importe_con_iva9" id="importe_con_iva9" type="hidden">
-                    <!--FIN ITEM No. 9 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 10 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemParTabla">
-                        <td>
-                            <select name="series10[]" id="series10" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(10)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion10" id="descripcion10" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(10)" readonly>
-                            <input style="display: none" name="grabaiva10" id="grabaiva10" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega10" id="cbobodega10" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad10" id="cantidad10" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(10)">
-                        </td>
-                        <td align="center"><input NAME="precio10" id="precio10" type="text" class="cajaPequena2"
-                                                  size="10" maxlength="10" onChange="actualizar_importe(10)"></td>
-
-                        <td align="center">
-                            <input NAME="descuentoporc10" id="descuentoporc10" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(10)" value="0">%
-                            <input NAME="descuento10" id="descuento10" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(10)">&#36;
-                        </td>
-
-                        <td align="center"><input NAME="subt10" id="subt10" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(10)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(10)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe10" id="importe10" type="hidden" value="0">
-                    <input NAME="ivaporc10" id="ivaporc10" type="hidden" onChange="suma_iva(10)">
-                    <input NAME="iva10" id="iva10" type="hidden" value="0">
-
-                    <input name="idarticulo10" id="idarticulo10" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo10" id="costo10" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock10" id="stock10" type="hidden">
-
-                    <input name="transformacion10" id="transformacion10" type="hidden">
-                    <input name="precio_con_iva10" id="precio_con_iva10" type="hidden">
-                    <input name="importe_con_iva10" id="importe_con_iva10" type="hidden">
-                    <!--FIN ITEM No. 10 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
-
-                    <!--************************************************************************************************ -->
-                    <!--INICIO ITEM No. 11 de la Factura----------------------------------------------------------------- -->
-
-                    <tr class="itemImparTabla">
-                        <td>
-                            <select name="series11[]" id="series11" size="3" style="width: 100%"
-                                    multiple="multiple"></select>
-                        </td>
-                        <td>
-                            <img src="../img/ver.png" width="16" height="16" onClick="ventanaArticulos(11)"
-                                 onMouseOver="style.cursor = cursor" title="Buscar articulos">
-                            <input NAME="descripcion11" id="descripcion11" type="text" class="cajaExtraGrande" size="30"
-                                   maxlength="30" onClick="ventanaArticulos(11)" readonly>
-                            <input style="display: none" name="grabaiva11" id="grabaiva11" class="cajaExtraMinima"
-                                   readonly>
-
-                        </td>
-
-                        <td align="center">
-                            <select name="cbobodega11" id="cbobodega11" class="comboPequeno"></select>
-                        </td>
-
-                        <td align="center"><input NAME="cantidad11" id="cantidad11" type="text" class="cajaMinima"
-                                                  size="10" maxlength="10" value="1" onChange="actualizar_importe(11)">
-                        </td>
-                        <td align="center"><input NAME="precio11" id="precio11" type="text" class="cajaPequena2"
-                                                  size="10" maxlength="10" onChange="actualizar_importe(11)"></td>
-                        <!--<td ><input NAME="1importe11" id="1importe11" type="text" class="cajaPequena2" size="10" maxlength="10" value="0" readonly>&#36;</td>-->
-                        <td align="center">
-                            <input NAME="descuentoporc11" id="descuentoporc11" type="text" class="cajaMinima" size="10"
-                                   maxlength="10" onChange="actualizar_descuento(11)" value="0">%
-                            <input NAME="descuento11" id="descuento11" type="text" class="cajaPequena2" size="10"
-                                   maxlength="10" value="0" onchange="actualizar_porcentaje_descuento(11)">&#36;
-                        </td>
-                        <!--<td >
-                            <input NAME="1ivaporc11" id="1ivaporc11" type="text" class="cajaMinima" size="10" maxlength="10" onChange="suma_iva(11)" readonly>%
-                            <input NAME="1iva11" id="1iva11" type="text" class="cajaPequena2" size="10" maxlength="10" value="0" readonly>&#36;
-                        </td>-->
-                        <td align="center"><input NAME="subt11" id="subt11" type="text" class="cajaPequena2" value="0"
-                                                  onchange="actualizar_totales(11)" readonly></td>
-                        <td align="center"><img src="../img/eliminar.png" width="16" height="16"
-                                                onClick="limpiar_articulo(11)" onMouseOver="style.cursor = cursor"
-                                                title="Eliminar"></td>
-                    </tr>
-
-                    <input NAME="importe11" id="importe11" type="hidden" value="0">
-                    <input NAME="ivaporc11" id="ivaporc11" type="hidden" onChange="suma_iva(11)">
-                    <input NAME="iva11" id="iva11" type="hidden" value="0">
-
-                    <input name="idarticulo11" id="idarticulo11" value="<?php  echo $idarticulo ?>" type="hidden">
-                    <input name="costo11" id="costo11" value="<?php  echo $costo ?>" type="hidden">
-                    <input name="stock11" id="stock11" type="hidden">
-
-                    <input name="transformacion11" id="transformacion11" type="hidden">
-                    <input name="precio_con_iva11" id="precio_con_iva11" type="hidden">
-                    <input name="importe_con_iva11" id="importe_con_iva11" type="hidden">
-                    <!--FIN ITEM No. 11 de la Factura-------------------------------------------------------------------- -->
-                    <!--************************************************************************************************ -->
                 </table>
                 <br/>
 
             </div>
+
+            <input id="pvpa" name="pvpa" value="" type="hidden">
+            <input id="pvpb" name="pvpb" value="" type="hidden">
+            <input id="pvpc" name="pvpc" value="" type="hidden">
+            <input id="pvpd" name="pvpd" value="" type="hidden">
+
 
             <div id="frmBusqueda">
 
@@ -1233,7 +612,7 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 
 
                     <tr>
-                        <td class="busqueda">IVA <?php  echo $ivaporcetaje; ?>%</td>
+                        <td class="busqueda">IVA <?php echo $ivaporcetaje; ?>%</td>
                         <td align="right">
                             <div align="center">
                                 <input class="cajaTotales" name="iva12" type="text" id="iva12" size="12" align="right"
@@ -1256,7 +635,9 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
                         <td width="" align="right">
                             <div align="center">
                                 <input class="cajaTotales" name="flete" type="text" id="flete" size="12" value=0
-                                       align="right" onchange="sumar_flete()">
+                                       align="right"
+                                       onfocus="this.oldvalue = this.value;"
+                                       onchange="sumarFlete(this);this.oldvalue = this.value;">
                                 &#36;</div>
                         </td>
                     </tr>

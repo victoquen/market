@@ -5,8 +5,9 @@
  */
 
 /* Array of database columns which should be read and sent back to DataTables */
-$aColumns = array('id_factura', 'codigo_factura', 'nombre', 'fecha', 'estado', 'totalfactura', 'retiva', 'retfuente');
-$aColumnsAux = array('a.codigo_factura', 'b.nombre', 'a.fecha', 'a.estado', 'a.totalfactura', 'a.ret_iva', 'a.ret_fuente');
+$aColumns = array('id_factura', 'leyendafacturero','codigo_factura', 'nombre', 'fecha', 'estado', 'totalfactura', 'retiva', 'retfuente');
+$aColumnsAux = array('id_factura','leyendafacturero', 'codigo_factura', 'nombre', 'fecha', 'estado', 'totalfactura', 'retiva', 'retfuente');
+//$aColumnsAux = array('a.id_factura','a.codigo_factura', 'b.nombre', 'a.fecha', 'a.estado', 'a.totalfactura', 'a.ret_iva', 'a.ret_fuente');
 /* Indexed column (used for fast and accurate table cardinality) */
 $sIndexColumn = "id_factura";
 
@@ -50,7 +51,7 @@ if (isset($_GET['iSortCol_0'])) {
  */
 $sWhere = "";
 if ($_GET['sSearch'] != "") {
-    $sWhere = "AND( ";
+    $sWhere = "WHERE( ";
     for ($i = 0; $i < count($aColumnsAux); $i++) {
         $sWhere .= $aColumnsAux[$i] . " LIKE '%" . mysql_real_escape_string($_GET['sSearch']) . "%' OR ";
     }
@@ -64,12 +65,33 @@ if ($_GET['sSearch'] != "") {
  * Get data to display
  */
 $sQuery = "
-		SELECT SQL_CALC_FOUND_ROWS a.id_factura as id_factura, a.codigo_factura as codigo_factura, b.nombre as nombre, a.totalfactura as totalfactura, a.fecha as fecha, a.estado as estado, a.ret_iva as retiva, a.ret_fuente as retfuente
-		FROM   facturas a INNER JOIN cliente b ON a.id_cliente=b.id_cliente WHERE (anulado = 0)
+		SELECT SQL_CALC_FOUND_ROWS id_factura, leyendafacturero, codigo_factura, nombre, fecha, estado, totalfactura, retiva, retfuente
+		FROM(
+            SELECT a.id_factura as id_factura, a.codigo_factura as codigo_factura, b.nombre as nombre, a.totalfactura as totalfactura, 
+            a.fecha as fecha, a.estado as estado, a.ret_iva as retiva, a.ret_fuente as retfuente, CONCAT( f.serie1,  '-', f.serie2 ) AS leyendafacturero
+            FROM   facturas a INNER JOIN cliente b ON a.id_cliente=b.id_cliente 
+            INNER JOIN facturero f ON a.id_facturero = f.id_facturero
+            WHERE (a.anulado = 0)
+		) R
+		
                 $sWhere
 		$sOrder
 		$sLimit
 	";
+/*
+$sQuery = "
+		SELECT SQL_CALC_FOUND_ROWS a.id_factura as id_factura, a.codigo_factura as codigo_factura, b.nombre as nombre,
+		a.totalfactura as totalfactura, a.fecha as fecha, a.estado as estado, a.ret_iva as retiva, a.ret_fuente as retfuente,
+		CONCAT( f.serie1,  '-', f.serie2 ) AS leyendafacturero
+		FROM   facturas a INNER JOIN cliente b ON a.id_cliente=b.id_cliente
+		INNER JOIN facturero f ON a.id_facturero = f.id_facturero
+		WHERE (a.anulado = 0)
+
+                $sWhere
+		$sOrder
+		$sLimit
+	";
+*/
 //$rResult = mysql_query( $sQuery, $gaSql['link'] ) or die(mysql_error());
 $rResult = mysql_query($sQuery, $conn) or die(mysql_error());
 /* Data set length after filtering */
@@ -106,6 +128,7 @@ while ($aRow = mysql_fetch_array($rResult)) {
     for ($i = 0; $i < count($aColumns); $i++) {
         if ($aColumns[$i] == "id_factura") {
             $code_aux = $aRow[$aColumns[$i]];
+            $sOutput .= '"' . str_replace('"', '\"', $aRow[$aColumns[$i]]) . '",';
             /* Special output formatting for 'version' */
             //$sOutput .= ($aRow[ $aColumns[$i] ]=="id_facturaventa") ?
             //'"-",' :

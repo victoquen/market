@@ -191,6 +191,38 @@ $op = $_GET["op"];
                                                    maxlength="45"></td>
                         </tr>
                         <tr>
+                            <td width="15%">PVP2</td>
+                            <td width="43%"><input NAME="Qpvp2" type="text" class="cajaPequena" id="pvp2" size="15"
+                                                   maxlength="45" value="0"></td>
+                        </tr>
+                        <tr>
+                            <td width="15%">PVP3</td>
+                            <td width="43%"><input NAME="Qpvp3" type="text" class="cajaPequena" id="pvp3" size="15"
+                                                   maxlength="45" value="0"></td>
+                        </tr>
+                        <tr>
+                            <td width="15%">PVP4</td>
+                            <td width="43%"><input NAME="Qpvp4" type="text" class="cajaPequena" id="pvp4" size="15"
+                                                   maxlength="45" value="0"></td>
+                        </tr>
+                        <tr>
+                            <td width="15%">UNIDAD</td>
+                            <td width="43%"><input NAME="aunidad" type="text" class="cajaPequena" id="unidad" size="15"
+                                                   maxlength="45" ></td>
+                        </tr>
+                        <tr>
+                            <td width="15%">UNIDAD X PACA</td>
+                            <td width="43%"><input NAME="auxpaca" type="text" class="cajaPequena" id="uxpaca" size="15"
+                                                   maxlength="45" ></td>
+                        </tr>
+
+                        <tr>
+                            <td width="15%">CODIGO DE BARRAS</td>
+                            <td width="43%"><input NAME="alector" type="text" class="cajaGrande" id="lector" size="15"
+                                                   maxlength="45" ></td>
+                        </tr>
+
+                        <tr>
                             <td width="15%">Utilidad</td>
                             <td width="43%"><input NAME="qutilidad" type="text" class="cajaPequena" id="utilidad"
                                                    size="15" maxlength="45" value="0">%

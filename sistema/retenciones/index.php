@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Ventas</title>
+		<title>RETENCIONES</title>
 		<link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 		<script language="javascript">
 		

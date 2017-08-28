@@ -8,15 +8,27 @@ header('Pragma: no-cache');
                 <title>Listado de Clientes</title>
 		<link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 
-                <!-- INICIO archivos para DATA TABLES-->
-                <style type="text/css" title="currentStyle">
+    <!-- INICIO archivos para DATA TABLES-->
+    <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
+    <link href="../css/style1.css" type="text/css" rel="stylesheet">
 
-			@import "../css/demo_table.css";
-		</style>
-		<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+    <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
+    <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
+    <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
-                <!-- FIN archivos para DATA TABLES-->
+    <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
+    <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.flash.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/jszip.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/pdfmake.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
+    <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
+
+    <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
+    <!-- FIN archivos para DATA TABLES-->
 
 
 		<script language="javascript">
@@ -24,10 +36,12 @@ header('Pragma: no-cache');
 
                 oTable = $('#example').dataTable( {
 
-                        "bProcessing": true,
-                        "bServerSide": true,
+                    "processing": true,
+                    "serverSide": true,
+                    "sPaginationType": "full_numbers",
+
                         "sAjaxSource": "processing_listado_clientes.php",
-                        "sPaginationType": "full_numbers",
+
 
                        /*"sDom": 'T<"clear">lfrtip',
                         "oTableTools": {

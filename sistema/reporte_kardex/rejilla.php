@@ -30,20 +30,27 @@ else
 		<link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 
 
-                <!-- INICIO archivos para DATA TABLES-->
-                <style type="text/css" title="currentStyle">
+        <!-- INICIO archivos para DATA TABLES-->
+        <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
+        <link href="../css/style1.css" type="text/css" rel="stylesheet">
 
-			@import "../css/demo_table.css";
-                        @import "TableTools-2.0.1/media/css/TableTools.css";
-		</style>
-		<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+        <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+        <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.flash.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jszip.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/pdfmake.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
 
-                <script type="text/javascript" charset="utf-8" src="TableTools-2.0.1/media/js/ZeroClipboard.js"></script>
-                <script type="text/javascript" charset="utf-8" src="TableTools-2.0.1/media/js/TableTools.js"></script>
-                <!-- FIN archivos para DATA TABLES-->
-
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
+        <!-- FIN archivos para DATA TABLES-->
 
 
 
@@ -53,10 +60,15 @@ else
 
                 oTable = $('#example').dataTable( {
                         "bFilter": false,
-                        "bProcessing": true,
-                        "bServerSide": true,
+                    "processing": true,
+                    "serverSide": true,
+                    "sPaginationType": "full_numbers",
+                    dom: '<"top"lBf>rt<"bottom"ip><"clear">',
+                    buttons: [
+                        'excel', 'pdf', 'print'
+                    ],
                         "sAjaxSource": "processing_kardex.php?fecha_inicio=<?php echo $fechainicio?>&fecha_fin=<?php echo $fechafin?>&idproducto=<?php echo $idproducto?>",
-                        "sPaginationType": "full_numbers",
+
                         
                         "aoColumns": [
                                         { "bSearchable": false, "bSortable": false },                                   
@@ -72,27 +84,7 @@ else
                                         { "bSearchable": false, "bSortable": false }
                                     ],
 
-                       "sDom": 'T<"clear">lfrtip',
-                        "oTableTools": {
-                            "sSwfPath": "TableTools-2.0.1/media/swf/copy_cvs_xls_pdf.swf",
-                            "aButtons": [
-
-                                "xls",
-                                {
-                                        "sExtends": "pdf",
-                                        "sPdfOrientation": "landscape",
-                                        "sPdfMessage": " Agro "
-
-                                },
-                                /*{
-                                        "sExtends": "print",
-                                        "sButtonText": "Imprimir",
-                                        "sInfo": "<h6>Vista Impresi&oacute;n</h6>Por favor use las funciones de impresi&oacute;n de su navegador para imprimir la tabla.<br/> Presione ESCAPE cuando haya finalizado.",
-                                        "sMessage": "<H3>Inventario facturas</H3><br/>"
-
-                                }*/
-                            ]
-                        },
+                       
                         "oLanguage": {
                             "oPaginate": {
                             "sPrevious": "Anterior",

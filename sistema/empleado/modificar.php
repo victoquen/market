@@ -67,7 +67,7 @@ $row = $empleado->get_id($conn, $idempleado);
 
                         <tr>
                             <td width="15%">CEDULA</td>
-                            <td width="43%"><input NAME="NAME="Vci_ruc"" type="text"  id="ci_ruc" value="<?php echo $row['cedula'] ?>" size="45" maxlength="45"></td>
+                            <td width="43%"><input NAME="Vci_ruc" type="text"  id="ci_ruc" value="<?php echo $row['cedula'] ?>" size="45" maxlength="45"></td>
 
                         </tr>
 

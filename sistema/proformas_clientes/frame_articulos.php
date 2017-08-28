@@ -11,14 +11,25 @@ $op = $_POST["op"];
         <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 
         <!-- INICIO archivos para DATA TABLES-->
-        <style type="text/css" title="currentStyle">
+        <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
+        <link href="../css/style1.css" type="text/css" rel="stylesheet">
 
-            @import "../css/demo_table.css";
-        </style>
-        <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+        <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-        <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+        <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.flash.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jszip.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/pdfmake.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
 
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
         <!-- FIN archivos para DATA TABLES-->
 
 
@@ -40,10 +51,12 @@ $op = $_POST["op"];
             $(document).ready(function() {
 
                 var oTable = $('#example').dataTable({
-                    "bProcessing": true,
-                    "bServerSide": true,
-                    "sAjaxSource": "processing_inventario_productos.php",
+                    "processing": true,
+                    "serverSide": true,
                     "sPaginationType": "full_numbers",
+                   
+                    "sAjaxSource": "processing_inventario_productos.php",
+
                     /*"sDom": 'T<"clear">lfrtip',
                      "oTableTools": {
                      "sSwfPath": "TableTools-2.0.1/media/swf/copy_cvs_xls_pdf.swf",

@@ -65,7 +65,7 @@ class Factulineap
 
     public function get_factulinea_id($conn, $id)
     {
-        $rows;
+     
         $query="SELECT idfactura_venta, id_producto, cantidad, precio, dcto, subtotal FROM factulineap WHERE id_factulinea ='$id' AND borrado = 0";
         $result = mysql_query($query, $conn);
         $row = mysql_fetch_assoc($result);

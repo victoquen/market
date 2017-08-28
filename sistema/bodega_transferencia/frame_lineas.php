@@ -56,7 +56,7 @@ if ($retorno == 0) {
     //*******************************************************************************************************
 
     $sel_insert = "INSERT INTO transferencialineatmp (id_transferencia,numlinea,id_bodegaorigen,id_bodegadestino,id_producto,cantidad, series) 
-                    VALUES ('$transferenciatmp','','$bodegaorigen','$bodegadestino','$idarticulo','$cantidad','$series_string')";
+                    VALUES ('$transferenciatmp',null,'$bodegaorigen','$bodegadestino','$idarticulo','$cantidad','$series_string')";
     $rs_insert = mysql_query($sel_insert, $conn);
 
 

@@ -166,7 +166,7 @@ while ($aRow = mysql_fetch_array($rResult)) {
      */
 
 
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/dinero.jpg' border='0' width='16' height='16' border='1' title='Cobrar' onClick='ver_cobros(" . $code_aux . ")' onMouseOver='style.cursor=cursor'></a>") . '",';
+    //$sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/dinero.jpg' border='0' width='16' height='16' border='1' title='Cobrar' onClick='ver_cobros(" . $code_aux . ")' onMouseOver='style.cursor=cursor'></a>") . '",';
 
     $sOutput = substr_replace($sOutput, "", -1);
     $sOutput .= "],";

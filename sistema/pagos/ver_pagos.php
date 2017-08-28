@@ -70,10 +70,10 @@ else
                       {                                                        
                           case "1":
                             acbobanco.selectedIndex=0;
-                            acbobanco.disabled = true;
+                            acbobanco.readonly = true;
                             break;
                           default:
-                            acbobanco.disabled = false;
+                            acbobanco.readonly = false;
                             break;
                       }
                    }
@@ -237,7 +237,7 @@ else
 
 						<tr>
 							<td width="15%">Entidad Bancaria</td>
-                                                        <td width="35%"><select id="acbobanco"  class="comboGrande" NAME="acbobanco" disabled="true">
+                                                        <td width="35%"><select id="acbobanco"  class="comboGrande" NAME="acbobanco" readonly="true">
                                                                     <option value="0">Seleccione una entidad bancaria</option>
 								<?php 
 								while ($contador < mysql_num_rows($res_b)) { ?>

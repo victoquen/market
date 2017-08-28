@@ -2,7 +2,7 @@
 include("../conexion/conexion.php");
 $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
-error_reporting(0);
+//error_reporting(0);
 
 //porcentaje iva parametrizable*****************************************
 $sel_iva = "select porcentaje FROM iva where activo=1 AND borrado=0";
@@ -16,7 +16,10 @@ $id_bodega = $_SESSION['id_bodega'];
 $tipo = $_SESSION['tipo'];
 
 //SERIE OBLIGATORIO***************************************************
-$obligatorio_serie = 1;
+$sel_obli = "select serie_unica FROM param_item where  borrado=0";
+$rs_obli = mysql_query($sel_obli, $conn);
+$obligatorio_serie = mysql_result($rs_obli, 0, "serie_unica");
+
 
 
 $codfactura = $_GET["codfacturatmp"];
@@ -31,8 +34,16 @@ $descuento = $_GET["descuento"];
 $descuento_pasar = $_GET["descuento"];
 
 $idbodega = $_GET["idbodega"];
+
+
 $series_string = $_GET["series"];
-$series = split("----", $series_string);
+
+if($obligatorio_serie == 1){
+    $series = split("----", $series_string);
+}else{
+    $series = "";
+}
+
 
 $descuento_porc = ($descuento * 100) / $importe;
 $descuento_porc_pasar = ($descuento * 100) / $importe;
@@ -45,7 +56,10 @@ if ($iva > 0) {
 } else {
     $iva_porc = 0;
 }
-$query_l = "SELECT l.id_articulo as idarticulo, l.cantidad as cantidad, l.costo as costo, p.nombre as nombre FROM factulineaptmp l INNER JOIN producto p
+$query_l = "SELECT l.id_articulo as idarticulo, l.cantidad as cantidad, l.costo as costo, p.nombre as nombre, 
+                  l.pvp as pvp, l.pvpb as pvpb, l.pvpc as pvpc, l.pvpd as pvpd, l.lector as lector
+
+          FROM factulineaptmp l INNER JOIN producto p
           ON l.id_articulo = p.id_producto
           WHERE l.codfactura = " . $codfactura . " AND l.numlinea = " . $numlinea;
 
@@ -99,7 +113,7 @@ $rs_l = mysql_query($query_l, $conn);
         }
 
 
-        function guardar_articulo(importe, iva) {
+        function guardar_articulo(importe, iva, desc) {
             var mensaje = "";
             if (document.getElementById("cantidad").value == "") {
                 mensaje += "   - Ingrese la cantidad.\n";
@@ -145,12 +159,16 @@ $rs_l = mysql_query($query_l, $conn);
 //		var result5=Math.round(original5*100)/100 ;
 //		parent.opener.document.formulario_lineas.preciototal.value=result5;
 
-                var theSelect1 = document.getElementById('series');
-                var options1 = theSelect1.getElementsByTagName('OPTION');
-                var numSeries1 = options1.length;
-                for(var i=0; i<numSeries1; i++){
-                    options1[i].selected = true;
+                if(<?php echo $obligatorio_serie?> == 1)
+                {
+                    var theSelect1 = document.getElementById('series');
+                    var options1 = theSelect1.getElementsByTagName('OPTION');
+                    var numSeries1 = options1.length;
+                    for (var i = 0; i < numSeries1; i++) {
+                        options1[i].selected = true;
+                    }
                 }
+
                 document.getElementById("form1").submit();
 
             }
@@ -267,11 +285,36 @@ $rs_l = mysql_query($query_l, $conn);
                                                    maxlength="13" onChange="actualizar_importe()"></td>
                         </tr>
                         <tr>
-                            <td width="5%">Precio:</td>
+                            <td width="5%">Costo:</td>
                             <td width="40%"><input NAME="precio" type="text" class="cajaPequena" id="precio"
                                                    value="<?php echo mysql_result($rs_l, 0, "costo"); ?>" size="45"
                                                    maxlength="45" onChange="actualizar_importe()">&#36;</td>
                         </tr>
+
+                        <tr>
+                            <td width="5%">PVP A:</td>
+                            <td width="40%">
+                                <input NAME="pvp" type="text" class="cajaPequena" id="pvp"
+                                                   value="<?php echo mysql_result($rs_l, 0, "pvp"); ?>" size="45"
+                                                   maxlength="45">&#36;
+                          PVP B:
+                           <input NAME="pvpb" type="text" class="cajaPequena" id="pvpb"
+                                                        value="<?php echo mysql_result($rs_l, 0, "pvpb"); ?>" size="45"
+                                                        maxlength="45" >&#36;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="5%">PVP C:</td>
+                            <td width="40%"><input NAME="pvpc" type="text" class="cajaPequena" id="pvpc"
+                                                        value="<?php echo mysql_result($rs_l, 0, "pvpc"); ?>" size="45"
+                                                        maxlength="45" >&#36;
+                           PVP D:
+                           <input NAME="pvpd" type="text" class="cajaPequena" id="pvpd"
+                                                        value="<?php echo mysql_result($rs_l, 0, "pvpd"); ?>" size="45"
+                                                        maxlength="45" >&#36;
+                            </td>
+                        </tr>
+
                         <tr>
                             <td>Dcto.:</td>
                             <td>
@@ -292,7 +335,7 @@ $rs_l = mysql_query($query_l, $conn);
                         <tr>
                             <td width="5%">Subtotal:</td>
                             <td width="40%"><input NAME="importe" type="text" class="cajaPequena" id="importe"
-                                                   value="<?php echo $importe; ?>" maxlength="13"></td>
+                                                   value="<?php echo $importe; ?>" ></td>
                         </tr>
                         <tr>
                             <td width="5%">Iva:</td>
@@ -300,10 +343,16 @@ $rs_l = mysql_query($query_l, $conn);
                                 <input NAME="ivaporc" type="text" class="cajaMinima" id="ivaporc" size="10"
                                        maxlength="10" onChange="suma_iva()" readonly value="<?php echo $iva_porc ?>">%
                                 <input NAME="iva" type="text" class="cajaMedia" id="iva" value="<?php echo $iva; ?>"
-                                       size="45" maxlength="45">&#36;
+                                       size="45" maxlength="45" readonly>&#36;
                             </td>
                         </tr>
+                        <tr>
+                            <td width="5%">Código Barras:</td>
+                            <td width="40%"><input NAME="lector" type="text" class="cajaGrande" id="lector"
+                                                   value="<?php echo mysql_result($rs_l, 0, "lector"); ?>" ></td>
+                        </tr>
 
+                        <?php if($obligatorio_serie == 1){?>
                         <tr>
                             <td>Series:</td>
                             <td>
@@ -326,6 +375,7 @@ $rs_l = mysql_query($query_l, $conn);
                                 <input type="button" onclick="DeleteItem()" value="Quitar Serie"/>
                             </td>
                         </tr>
+                        <?php }?>
 
                     </table>
 

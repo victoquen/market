@@ -1,6 +1,6 @@
 <?php
 //include ("../conectar.php");
-//error_reporting(0);
+error_reporting(0);
 ?>
 <html>
 	<head>
@@ -8,15 +8,15 @@
         <title>Listado de empleados</title>
 
         <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
+
+        <!-- INICIO archivos para DATA TABLES-->
         <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
         <link href="../css/style1.css" type="text/css" rel="stylesheet">
-
 
         <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
         <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
         <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-        <!-- INICIO archivos para DATA TABLES-->
        <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
        <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
        <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
@@ -26,8 +26,7 @@
        <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
        <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
        <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
-
-
+        
        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
        <!-- FIN archivos para DATA TABLES-->
@@ -56,9 +55,12 @@
                var oTable=  $('#example').dataTable( {
                    "processing": true,
                    "serverSide": true,
-                   "sAjaxSource": "processing_listado.php",
-
                    "sPaginationType": "full_numbers",
+                   dom: '<"top"lBf>rt<"bottom"ip><"clear">',
+                   buttons: [
+                       'excel', 'pdf', 'print'
+                   ],
+                   "sAjaxSource": "processing_listado.php",
 
                    "aoColumns": [
                        null,
@@ -68,10 +70,7 @@
                        { "bSearchable": false, "bSortable": false }
                    ],
 
-                   dom: '<"top"lBf>rt<"bottom"ip><"clear">',
-                   buttons: [
-                       'excel', 'pdf', 'print'
-                   ],
+                  
 
 
                  "oLanguage": {
@@ -103,11 +102,9 @@
                        "sSearch": "Buscar:"
 
                     }
-
-
+                   
                 } );
-
-
+            
         } );
 
 		</script>

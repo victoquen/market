@@ -6,7 +6,7 @@
 
 /* Array of database columns which should be read and sent back to DataTables */
 $aColumns = array('id_facturap', 'fecha', 'codigo_factura', 'empresa', 'estado', 'totalfactura', 'retencion');
-$aColumnsAux = array('a.fecha', 'a.codigo_factura', 'b.empresa', 'a.estado', 'a.totalfactura');
+$aColumnsAux = array('a.id_facturap','a.fecha', 'a.codigo_factura', 'b.empresa', 'a.estado', 'a.totalfactura','a.retencion');
 /* Indexed column (used for fast and accurate table cardinality) */
 $sIndexColumn = "id_facturap";
 
@@ -64,8 +64,13 @@ if ($_GET['sSearch'] != "") {
  * Get data to display
  */
 $sQuery = "
-		SELECT SQL_CALC_FOUND_ROWS a.id_facturap as id_facturap, a.codigo_factura as codigo_factura, b.empresa as empresa, a.totalfactura as totalfactura, a.fecha as fecha, a.estado as estado, a.retencion as retencion
-		FROM   facturasp a INNER JOIN proveedor b ON a.id_proveedor=b.id_proveedor WHERE (a.anulado = 0)
+		
+	  SELECT SQL_CALC_FOUND_ROWS a.id_facturap as id_facturap, a.codigo_factura as codigo_factura, b.empresa as empresa, a.totalfactura as totalfactura, 
+		a.fecha as fecha, a.estado as estado, a.retencion as retencion
+		FROM   facturasp a 
+		INNER JOIN proveedor b ON a.id_proveedor=b.id_proveedor 
+		WHERE (a.anulado = 0)
+		
                 $sWhere
 		$sOrder
 		$sLimit
@@ -106,6 +111,7 @@ while ($aRow = mysql_fetch_array($rResult)) {
     for ($i = 0; $i < count($aColumns); $i++) {
         if ($aColumns[$i] == "id_facturap") {
             $code_aux = $aRow[$aColumns[$i]];
+            $sOutput .= '"' . str_replace('"', '\"', $aRow[$aColumns[$i]]) . '",';
             /* Special output formatting for 'version' */
             //$sOutput .= ($aRow[ $aColumns[$i] ]=="id_facturaventa") ?
             //'"-",' :

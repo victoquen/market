@@ -34,7 +34,7 @@
                                 </div>
                                      </form>
 				<div id="lineaResultado">
-					<iframe width="30%" height="800px" id="frame_rejilla" name="frame_rejilla" frameborder="0">
+					<iframe width="50%" height="800px" id="frame_rejilla" name="frame_rejilla" frameborder="0">
 						<ilayer width="100%" height="800px" id="frame_rejilla" name="frame_rejilla"></ilayer>
 					</iframe>					
 				</div>

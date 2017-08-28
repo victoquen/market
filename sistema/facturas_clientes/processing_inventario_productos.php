@@ -4,8 +4,8 @@
  */
 
 /* Array of database columns which should be read and sent back to DataTables */
-$aColumns = array('p.id_producto', 'p.codigo', 'p.nombre', 'p.stock', 'p.pvp', 'p.costo', 'p.iva', 'p.transformacion');
-$aColumns_aux = array('p.id_producto', 'p.codigo', 'p.nombre', 'p.stock', 'p.pvp', 'p.costo', 'p.iva', 'p.transformacion');
+$aColumns = array('p.id_producto', 'p.codigo', 'p.nombre', 'p.stock', 'p.pvp', 'p.costo', 'p.iva', 'p.transformacion','p.pvp2','p.pvp3','p.pvp4');
+$aColumns_aux = array('id_producto', 'codigo','nombre', 'stock', 'pvp', 'costo', 'iva', 'transformacion','pvp2','pvp3','pvp4', 'codigo_barra');
 /* Indexed column (used for fast and accurate table cardinality) */
 $sIndexColumn = "id_producto";
 
@@ -46,7 +46,7 @@ if (isset($_GET['iSortCol_0'])) {
  */
 $sWhere = "";
 if ($_GET['sSearch'] != "") {
-    $sWhere = "AND( ";
+    $sWhere = "WHERE( ";
     for ($i = 0; $i < count($aColumns_aux); $i++) {
         $sWhere .= $aColumns_aux[$i] . " LIKE '%" . mysql_real_escape_string($_GET['sSearch']) . "%' OR ";
     }
@@ -77,20 +77,32 @@ if ($tipo == "administrador") {
 ";*/
 
     $sQuery = "
-		SELECT SQL_CALC_FOUND_ROWS " . implode(", ", $aColumns_aux) . "
-		FROM   producto p INNER JOIN productobodega pb ON p.id_producto = pb.id_producto   
-		WHERE (p.borrado = 0)AND(pb.id_bodega = '$id_bodega') 
-                $sWhere
+		SELECT SQL_CALC_FOUND_ROWS id_producto, codigo, nombre, stock, pvp, costo, iva, transformacion,pvp2,pvp3,pvp4, codigo_barra
+        FROM  (
+        SELECT p.id_producto as id_producto , p.codigo as codigo, p.nombre as nombre, p.stock as stock, p.pvp as pvp, p.costo as costo, p.iva as iva, p.transformacion as transformacion,p.pvp2 as pvp2,p.pvp3 as pvp3,p.pvp4 as pvp4, GROUP_CONCAT( c.codigo ) AS codigo_barra
+                FROM   producto p 
+                INNER JOIN productobodega pb ON p.id_producto = pb.id_producto 
+                LEFT JOIN producto_barracodigo c ON p.id_producto = c.id_producto  
+                WHERE (p.borrado = 0)AND(pb.id_bodega = '$id_bodega') 
+                GROUP BY p.id_producto
+        ) r
+        $sWhere
 		$sOrder
 		$sLimit
 		";
 } else {
 
     $sQuery = "
-		SELECT SQL_CALC_FOUND_ROWS " . implode(", ", $aColumns_aux) . "
-		FROM   producto p INNER JOIN productobodega pb ON p.id_producto = pb.id_producto   
-		WHERE (p.borrado = 0)AND(pb.id_bodega = '$id_bodega') 
-                $sWhere
+		SELECT SQL_CALC_FOUND_ROWS id_producto, codigo, nombre, stock, pvp, costo, iva, transformacion,pvp2,pvp3,pvp4, codigo_barra
+        FROM  (
+        SELECT p.id_producto as id_producto , p.codigo as codigo, p.nombre as nombre, p.stock as stock, p.pvp as pvp, p.costo as costo, p.iva as iva, p.transformacion as transformacion,p.pvp2 as pvp2,p.pvp3 as pvp3,p.pvp4 as pvp4, GROUP_CONCAT( c.codigo ) AS codigo_barra
+                FROM   producto p 
+                INNER JOIN productobodega pb ON p.id_producto = pb.id_producto 
+                LEFT JOIN producto_barracodigo c ON p.id_producto = c.id_producto  
+                WHERE (p.borrado = 0)AND(pb.id_bodega = '$id_bodega') 
+                GROUP BY p.id_producto
+        ) r
+        $sWhere
 		$sOrder
 		$sLimit
 		";
@@ -143,6 +155,9 @@ while ($aRow = mysql_fetch_array($rResult)) {
     $codigo_aux = $aRow["codigo"];
     $nombre_aux = $aRow["nombre"];
     $pvp_aux = $aRow["pvp"];
+    $pvp2 = $aRow["pvp2"];
+    $pvp3 = $aRow["pvp3"];
+    $pvp4 = $aRow["pvp4"];
     $costo_aux = $aRow["costo"];
 
     if ($tipo == "administrador") {
@@ -189,13 +204,20 @@ while ($aRow = mysql_fetch_array($rResult)) {
     $series_pass = json_encode($series);
 
 
-    //$sOutput .= '"'.str_replace('"', '\"', "<a href='#' style='font-size: 9px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;)'>". $aRow["codigo"]."</a>" ).'",';
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass)'>" . $aRow["nombre"] . "</a>") . '",';
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass)'>" . $aRow["stock"] . "</a>") . '",';
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass)'>" . $aRow["pvp"] . "</a>") . '",';
-    //$sOutput .= '"'.str_replace('"', '\"', "<a href='#' style='font-size: 9px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;)'>".$aRow["fecha_caducidad"]."</a>").'",';
+    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39;,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass,&#39;$pvp2&#39;,&#39;$pvp3&#39;,&#39;$pvp4&#39;)'>" . $aRow["codigo_barra"] . "</a>") . '",';
+    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39;,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass,&#39;$pvp2&#39;,&#39;$pvp3&#39;,&#39;$pvp4&#39;)'>" . $aRow["nombre"] . "</a>") . '",';
+    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39;,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass,&#39;$pvp2&#39;,&#39;$pvp3&#39;,&#39;$pvp4&#39;)'>" . $aRow["stock"] . "</a>") . '",';
+    $sOutput .= '"' . str_replace('"', '\"', "<a href='#' style='font-size: 11px; text-decoration: none' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39;,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass,&#39;$pvp2&#39;,&#39;$pvp3&#39;,&#39;$pvp4&#39;)'>" . $aRow["pvp"] . "</a>") . '",';
 
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/seleccionar.gif' border='0' width='16' height='16' border='1' title='Modificar' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass)' onMouseOver='style.cursor=cursor'></a>") . '",';
+
+
+
+    if($iFilteredTotal == 1){
+        $sOutput .= '"' . str_replace('"', '\"', "<script>pon_prefijo('$codigo_aux','$nombre_aux','$pvp_aux','$id_aux','$costo_aux','$stock_aux','$iva_aux','$transformacion_aux','$importe_iva',$series_pass,'$pvp2','$pvp3','$pvp4')</script>") . '",';
+    }else{
+        $sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/seleccionar.gif' border='0' width='16' height='16' border='1' title='Modificar' onClick='pon_prefijo(&#39;$codigo_aux&#39;,&#39;$nombre_aux&#39;,&#39;$pvp_aux&#39;,&#39;$id_aux&#39;,&#39;$costo_aux&#39;,&#39;$stock_aux&#39;,&#39;$iva_aux&#39;,&#39;$transformacion_aux&#39;,&#39;$importe_iva&#39;,$series_pass,&#39;$pvp2&#39;,&#39;$pvp3&#39;,&#39;$pvp4&#39;)' onMouseOver='style.cursor=cursor'></a>") . '",';
+    }
+
 
 
     $sOutput = substr_replace($sOutput, "", -1);
@@ -203,6 +225,6 @@ while ($aRow = mysql_fetch_array($rResult)) {
 }
 $sOutput = substr_replace($sOutput, "", -1);
 $sOutput .= '] }';
-
 echo $sOutput;
+
 ?>

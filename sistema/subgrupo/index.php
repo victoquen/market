@@ -1,7 +1,7 @@
 <html>
 	<head>
                 <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
-		<title>Productos</title>
+		<title>SUBGRUPO</title>
 		<link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 		<script language="javascript">
 		

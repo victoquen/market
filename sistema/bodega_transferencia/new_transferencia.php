@@ -10,9 +10,12 @@ $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
 
 $fechahoy = date("Y-m-d");
-$sel_fact = "INSERT INTO transferenciatmp (id_transferencia,fecha) VALUE ('','$fechahoy')";
+$sel_fact = "INSERT INTO transferenciatmp (id_transferencia,fecha) VALUE (null,'$fechahoy')";
 $rs_fact = mysql_query($sel_fact, $conn);
 $transferenciatmp = mysql_insert_id();
+
+$query = "DELETE FROM transferencialineatmp WHERE id_transferencia='$transferenciatmp'";
+            $rs = mysql_query($query, $conn);
 
 //SERIE OBLIGATORIO***************************************************
 $obligatorio_serie = 1;

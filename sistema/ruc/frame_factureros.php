@@ -15,7 +15,7 @@ function eliminar_linea(idruc,idfacturero)
 
 function modificar_facturero(idruc,idfacturero)
 {
-    miPopup = window.open("ver_facturero.php?idruc="+idruc+"&idfacturero="+idfacturero,"miwin","width=600,height=300,scrollbars=yes");
+    miPopup = window.open("ver_facturero.php?idruc="+idruc+"&idfacturero="+idfacturero,"miwin","width=600,height=500,scrollbars=yes");
     miPopup.focus();
    //window.opener.frame_datos.location.reload("frame_telefonos_final.php?idcliente="+idcliente);
     //document.getElementById("frame_datos").src="frame_telefonos_final.php?idcliente="+idcliente;

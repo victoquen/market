@@ -69,10 +69,10 @@ else
                     {
                         case "1":
                             acbobanco.selectedIndex = 0;
-                            acbobanco.disabled = true;
+                            acbobanco.readonly = true;
                             break;
                         default:
-                            acbobanco.disabled = false;
+                            acbobanco.readonly = false;
                             break;
                     }
                 }
@@ -215,7 +215,7 @@ $contador = 0;
                                     <td width="11%">Importe x Cobrar:</td>
                                     <td width="12%"><input  id="Rimporte" type="text" class="cajaPequena" NAME="Rimporte" maxlength="12" onchange="calcular_cambio()" style="text-align: right" value="<?php echo $pendiente?>"> &#36;</td>
                                     <td width="11%">Entidad Bancaria</td>
-                                    <td width="35%"><select id="acbobanco"  class="comboGrande" NAME="acbobanco" disabled="true">
+                                    <td width="35%"><select id="acbobanco"  class="comboGrande" NAME="acbobanco" readonly="true">
                                             <option value="1">Seleccione una entidad bancaria</option>
 <?php while ($contador < mysql_num_rows($res_b)) { ?>
                                                 <option value="<?php echo mysql_result($res_b, $contador, "id_banco") ?>"><?php echo mysql_result($res_b, $contador, "nombre") ?></option>

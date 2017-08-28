@@ -82,6 +82,20 @@ class Factura
 
     }
 
+    public function update_factura_bucle($conn, $idfactura, $descuento,$iva0, $iva12,$iva,$flete,$totalfactura,  $ret_iva, $ret_fuente, $estado)
+    {
+
+        $query = "UPDATE facturas SET  descuento='$descuento', iva0='$iva0', iva12='$iva12', 
+                                      iva = '$iva', flete='$flete', totalfactura = '$totalfactura', ret_iva = '$ret_iva', ret_fuente='$ret_fuente', estado ='$estado'
+                  WHERE id_factura = '$idfactura'";
+
+        $result = mysql_query($query, $conn);
+
+        return $result;
+
+    }
+
+
     public function get_factura_id($conn, $id)
     {
 

@@ -10,11 +10,12 @@ error_reporting(0);
     $origen=$_GET["origen"];
 
 $fechahoy=date("Y-m-d");
-$sel_clie="INSERT INTO clientetmp (idcliente,fecha) VALUE ('','$fechahoy')";
+$sel_clie="INSERT INTO clientetmp (idcliente,fecha) VALUE (null,'$fechahoy')";
 $rs_clie=mysql_query($sel_clie, $conn);
 $codclientetmp=mysql_insert_id();
 
-
+$query = "DELETE FROM clientefonotmp WHERE idcliente='$codclientetmp'";
+$rs = mysql_query($query, $conn);
 ?>
 
 <html>

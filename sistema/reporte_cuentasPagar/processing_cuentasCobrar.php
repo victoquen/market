@@ -159,7 +159,7 @@ while ($aRow = mysql_fetch_array($rResult)) {
      * database - you can do it here
      */
 
-    $sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/dinero.jpg' border='0' width='16' height='16' border='1' title='Cobrar' onClick='ver_pagos(" . $code_aux . ")' onMouseOver='style.cursor=cursor'></a>") . '",';
+    //$sOutput .= '"' . str_replace('"', '\"', "<a href='#'><img src='../img/dinero.jpg' border='0' width='16' height='16' border='1' title='Cobrar' onClick='ver_pagos(" . $code_aux . ")' onMouseOver='style.cursor=cursor'></a>") . '",';
 
     $sOutput = substr_replace($sOutput, "", -1);
     $sOutput .= "],";

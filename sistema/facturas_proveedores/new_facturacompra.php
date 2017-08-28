@@ -16,24 +16,60 @@ $sel_fact = "INSERT INTO facturasptmp (codfactura,fecha) VALUE (null,'$fechahoy'
 $rs_fact = mysql_query($sel_fact, $conn);
 $codfacturatmp = mysql_insert_id();
 
+$query = "DELETE FROM factulineaptmp WHERE codfactura='$codfacturatmp'";
+$rs = mysql_query($query, $conn);
+
 //get datos SESSION***************************************************
 session_start();
 $id_bodega = $_SESSION['id_bodega'];
 $tipo = $_SESSION['tipo'];
 
 //SERIE OBLIGATORIO***************************************************
-$obligatorio_serie = 1;
+$sel_obli = "select serie_unica FROM param_item where  borrado=0";
+$rs_obli = mysql_query($sel_obli, $conn);
+$obligatorio_serie = mysql_result($rs_obli, 0, "serie_unica");
 
 ?>
 <html>
 <head>
     <title>Principal</title>
     <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
-    <link href="../calendario/calendar-blue.css" rel="stylesheet" type="text/css">
-    <script type="text/JavaScript" language="javascript" src="../calendario/calendar.js"></script>
-    <script type="text/JavaScript" language="javascript" src="../calendario/lang/calendar-sp.js"></script>
-    <script type="text/JavaScript" language="javascript" src="../calendario/calendar-setup.js"></script>
+    <!-- INICIO ARCHIVOS CALENDARIO -->
+    <link rel="stylesheet" href="../css/jquery-ui.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.css"/>
+    <link rel="stylesheet" href="../css/jquery-ui.structure.min.css"/>
+    <script src="../js/jquery-1.12.4.js"></script>
+    <script src="../js/1.12.1_jquery-ui..js"></script>
+
     <script language="javascript">
+        $( function() {
+            $( "#fecha" ).datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                showOn: "button",
+                buttonImage: "../img/calendario.png",
+                buttonImageOnly: true,
+                buttonText: "Seleccionar Fecha"
+            });
+
+            $( "#fecha_caducidad" ).datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                showOn: "button",
+                buttonImage: "../img/calendario.png",
+                buttonImageOnly: true,
+                buttonText: "Seleccionar Fecha"
+            });
+        } );
+    </script>
+    <!-- FIN ARCHIVOS CALENDARIO -->
+
+    <script language="javascript">
+        var obligatorio_serie = <?php echo $obligatorio_serie;?>;
+
         var cursor;
         if (document.all) {
             // Está utilizando EXPLORER
@@ -43,14 +79,14 @@ $obligatorio_serie = 1;
             cursor = 'pointer';
         }
 
-        var miPopup
+        var miPopup;
         function abreVentana() {
             var codfactura = document.getElementById("codfactura").value;
-            var codfactura = document.getElementById("serie1").value;
-            var codfactura = document.getElementById("serie2").value;
-            var codfactura = document.getElementById("autorizacion").value;
-            if ((codfactura == "") || (serie1 == "") || (serie2 == "") || (autorizacion == "")) {
-                alert("Debe ingresar el No. y Autorizacion de la FACTURA");
+            var serie1 = document.getElementById("serie1").value;
+            var serie2 = document.getElementById("serie2").value;
+
+            if ((codfactura == "") || (serie1 == "") || (serie2 == "") ) {
+                alert("Debe ingresar el No.  de la FACTURA");
             }
             else {
                 miPopup = window.open("ver_proveedores.php", "miwin", "width=880,height=650,scrollbars=yes");
@@ -118,8 +154,6 @@ $obligatorio_serie = 1;
             if (document.getElementById("cboretencion").value == "2") mensaje += "  - Retencion no seleccionado\n";
 
 
-
-
             if (mensaje != "") {
                 alert("Atencion, se han detectado las siguientes incorrecciones:\n\n" + mensaje);
             } else {
@@ -129,7 +163,6 @@ $obligatorio_serie = 1;
 
         function validar() {
             var mensaje = "";
-            var entero = 0;
             var enteroo = 0;
 
             if (document.getElementById("codarticulo").value == "") mensaje = "  - Codigo Producto\n";
@@ -142,7 +175,6 @@ $obligatorio_serie = 1;
                     mensaje += "  - El Costo debe ser numerico\n";
                 }
             }
-
 
             if (document.getElementById("cantidad").value == "") {
                 mensaje += "  - Falta la cantidad\n";
@@ -157,14 +189,14 @@ $obligatorio_serie = 1;
 //
             if (document.getElementById("importe").value == "") mensaje += "  - Falta el importe\n";
 
-            if(<?php  echo $obligatorio_serie?> == 1){
-
+            if (obligatorio_serie == 1)
+            {
                 var theSelect = document.getElementById('series');
                 var options = theSelect.getElementsByTagName('OPTION');
                 var numProducto = document.getElementById("cantidad").value;
                 var numSeries = options.length;
 
-                if(numProducto != numSeries){
+                if (numProducto != numSeries) {
                     mensaje += "  - Cantidad de producto, no concuerda con cantidad Series ingresadas\n";
                 }
             }
@@ -180,11 +212,14 @@ $obligatorio_serie = 1;
 
                 actualizar_totales();
 
-                var theSelect1 = document.getElementById('series');
-                var options1 = theSelect1.getElementsByTagName('OPTION');
-                var numSeries1 = options1.length;
-                for(var i=0; i<numSeries1; i++){
-                    options1[i].selected = true;
+                if (obligatorio_serie == 1)
+                {
+                    var theSelect1 = document.getElementById('series');
+                    var options1 = theSelect1.getElementsByTagName('OPTION');
+                    var numSeries1 = options1.length;
+                    for (var i = 0; i < numSeries1; i++) {
+                        options1[i].selected = true;
+                    }
                 }
 
                 document.getElementById("formulario_lineas").submit();
@@ -196,8 +231,17 @@ $obligatorio_serie = 1;
                 document.getElementById("descuento_porc").value = 0;
                 document.getElementById("descuento").value = 0;
                 document.getElementById("iva").value = "0";
-                var theSelect = document.getElementById('series');
-                theSelect.innerHTML = "";
+                document.getElementById("pvp").value = "0";
+                document.getElementById("pvpb").value = "0";
+                document.getElementById("pvpc").value = "0";
+                document.getElementById("pvpd").value = "0";
+                document.getElementById("lector").value = "";
+                if (obligatorio_serie == 1
+            )
+                {
+                    var theSelect = document.getElementById('series');
+                    theSelect.innerHTML = "";
+                }
             }
         }
 
@@ -284,7 +328,6 @@ $obligatorio_serie = 1;
             document.getElementById("descuento").value = result1;
             suma_iva();
         }
-
 
         function activar_plazo(indice) {
             with (document.formulario) {
@@ -383,7 +426,7 @@ $obligatorio_serie = 1;
 
             var Text = document.getElementById("serieaux").value;
             //var Text = encodeURIComponent(document.getElementById("serieaux").value);
-            if(Text != ""){
+            if (Text != "") {
                 // Create an Option object
                 var opt = document.createElement("option");
                 // Add an Option object to Drop Down/List Box
@@ -391,27 +434,27 @@ $obligatorio_serie = 1;
                 // Assign text and value to Option object
                 opt.text = (Text);
                 opt.value = Text;
-                document.getElementById("serieaux").value="";
+                document.getElementById("serieaux").value = "";
             }
 
             var theSelect = document.getElementById('series');
             var options = theSelect.getElementsByTagName('OPTION');
             var numSeries = options.length;
-            for(var i=0; i<numSeries; i++){
+            for (var i = 0; i < numSeries; i++) {
                 options[i].selected = true;
             }
 
         }
 
-        function DeleteItem(){
+        function DeleteItem() {
 
 
             var theSelect = document.getElementById('series');
 
             var item = theSelect.options[theSelect.selectedIndex].value;
             var options = theSelect.getElementsByTagName('OPTION');
-            for(var i=0; i<options.length; i++) {
-                if(options[i].innerHTML == item) {
+            for (var i = 0; i < options.length; i++) {
+                if (options[i].innerHTML == item) {
                     theSelect.removeChild(options[i]);
                     i--; // options have now less element, then decrease i
                 }
@@ -420,13 +463,26 @@ $obligatorio_serie = 1;
 
 
         }
+
+
+        function limpiarLector(){
+            document.getElementById("lector").value="";
+        }
+
+        function handleKeyPress(e){
+            var key=e.keyCode || e.which;
+            if ((key==13)){
+                document.getElementById("lector").blur();
+            }
+        }
+
     </script>
 </head>
 <body>
 <div id="pagina">
     <div id="zonaContenido">
         <div align="center">
-            <div id="tituloForm" class="header">INSERTAR FACTURA COMPRA <?php echo $fechahoy;?></div>
+            <div id="tituloForm" class="header">INSERTAR FACTURA COMPRA <?php echo $fechahoy; ?></div>
             <div id="frmBusqueda">
                 <form id="formulario" name="formulario" method="post" action="guardar_factura.php">
                     <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0>
@@ -441,8 +497,9 @@ $obligatorio_serie = 1;
                             </td>
                             <td width="6%">Autorizaci&oacute;n</td>
                             <td colspan="2">
-                                <input NAME="autorizacion" type="text" class="cajaPequena" id="autorizacion"
+                                <input NAME="autorizacion" type="text" class="cajaMedia" id="autorizacion"
                                        maxlength="12">
+                                <input type="text" name="fecha_caducidad" id="fecha_caducidad" class="cajaPequena" readonly>
                             </td>
 
 
@@ -473,36 +530,23 @@ $obligatorio_serie = 1;
                             </td>
                             <td>CUENTA:
                                 <select name="cbocuenta" id="cbocuenta" class="comboMedio">
-                                    <?php 
+                                    <?php
                                     $query_cuenta = "SELECT id_cuenta, nombre FROM cuenta WHERE gasto=0";
                                     $sel_query = mysql_query($query_cuenta, $conn);
                                     while ($row = mysql_fetch_array($sel_query)) {
 
                                         ?>
                                         <option
-                                            value="<?php  echo $row['id_cuenta'] ?>"><?php  echo $row['nombre'] ?></option>
-                                    <?php  } ?>
+                                            value="<?php echo $row['id_cuenta'] ?>"><?php echo $row['nombre'] ?></option>
+                                    <?php } ?>
                                 </select>
                             </td>
                         </tr>
-                        <?php  $hoy = date("d/m/Y"); ?>
+
                         <tr>
                             <td width="6%">Fecha</td>
                             <td width="27%">
-                                <input NAME="fecha" type="text" class="cajaPequena" id="fecha" size="10" maxlength="10"
-                                       value="<?php  echo $hoy ?>" readonly> <img src="../img/calendario.png"
-                                                                                 name="Image1" id="Image1" width="16"
-                                                                                 height="16" border="0" id="Image1"
-                                                                                 onMouseOver="this.style.cursor='pointer'">
-                                <script type="text/javascript">
-                                    Calendar.setup(
-                                        {
-                                            inputField: "fecha",
-                                            ifFormat: "%d/%m/%Y",
-                                            button: "Image1"
-                                        }
-                                    );
-                                </script>
+                                <input type="text" id="fecha" name="fecha" value="<?php echo date("d/m/Y") ?>"  readonly>
                             </td>
 
 
@@ -540,17 +584,16 @@ $obligatorio_serie = 1;
                                     <option value="2" selected></option>
                                 </select>
                             </td>
-
-
+                            
                         </tr>
                     </table>
             </div>
-            <!--<input id="codfacturatmp" name="codfacturatmp" value="<?php  echo $codfacturatmp ?>" type="hidden">
-			  <input id="baseimpuestos2" name="baseimpuestos2" value="<?php  echo $baseimpuestos ?>" type="hidden">
-			  <input id="baseimponible2" name="baseimponible2" value="<?php  echo $baseimponible ?>" type="hidden">
-			  <input id="preciototal2" name="preciototal2" value="<?php  echo $preciototal ?>" type="hidden">
-                          <input id="baseretencion2" name="baseretencion2" value="<?php  echo $baseretencion ?>" type="hidden">-->
-            <input id="codfacturatmp" name="codfacturatmp" value="<?php  echo $codfacturatmp ?>" type="hidden">
+            <!--<input id="codfacturatmp" name="codfacturatmp" value="<?php echo $codfacturatmp ?>" type="hidden">
+			  <input id="baseimpuestos2" name="baseimpuestos2" value="<?php echo $baseimpuestos ?>" type="hidden">
+			  <input id="baseimponible2" name="baseimponible2" value="<?php echo $baseimponible ?>" type="hidden">
+			  <input id="preciototal2" name="preciototal2" value="<?php echo $preciototal ?>" type="hidden">
+                          <input id="baseretencion2" name="baseretencion2" value="<?php echo $baseretencion ?>" type="hidden">-->
+            <input id="codfacturatmp" name="codfacturatmp" value="<?php echo $codfacturatmp ?>" type="hidden">
             <input id="iva02" name="iva02" value="0" type="hidden">
             <input id="iva122" name="iva122" value="0" type="hidden">
             <input id="iva0final" name="iva0final" value="0" type="hidden">
@@ -584,26 +627,26 @@ $obligatorio_serie = 1;
                                                    size="30" maxlength="30" readonly></td>
                                         <td>Bodega</td>
                                         <td>
-                                            <?php 
+                                            <?php
 
                                             $queryb = "SELECT b.id_bodega as idbodega, b.nombre as nombre FROM bodega b  WHERE b.id_bodega ='$id_bodega'";
                                             $resb = mysql_query($queryb, $conn); ?>
 
                                             <select name="cbobodega" id="cbobodega" class="comboMedio">
 
-                                                <?php 
+                                                <?php
 
                                                 $contador = 0;
                                                 while ($contador < mysql_num_rows($resb)) {
                                                     if (mysql_result($resb, $contador, "idbodega") == $bodega1) {
                                                         ?>
                                                         <option selected
-                                                                value="<?php  echo mysql_result($resb, $contador, "idbodega") ?>"><?php  echo mysql_result($resb, $contador, "nombre"); ?></option>
+                                                                value="<?php echo mysql_result($resb, $contador, "idbodega") ?>"><?php echo mysql_result($resb, $contador, "nombre"); ?></option>
 
-                                                    <?php  } else { ?>
+                                                    <?php } else { ?>
                                                         <option
-                                                            value="<?php  echo mysql_result($resb, $contador, "idbodega") ?>"><?php  echo mysql_result($resb, $contador, "nombre"); ?></option>
-                                                    <?php  }
+                                                            value="<?php echo mysql_result($resb, $contador, "idbodega") ?>"><?php echo mysql_result($resb, $contador, "nombre"); ?></option>
+                                                    <?php }
                                                     $contador++;
                                                 } ?>
 
@@ -637,11 +680,18 @@ $obligatorio_serie = 1;
                         </tr>
                         <tr>
                             <td colspan="2">
-                                Pvp: &nbsp;&nbsp;&nbsp;<input NAME="pvp" type="text" class="cajaPequena2" id="pvp"
+                                Pvp A: &nbsp;&nbsp;&nbsp;<input NAME="pvp" type="text" class="cajaPequena2" id="pvp"
                                                               size="10" maxlength="10"> &#36;
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Utilidad: <input
-                                    NAME="utilidad" type="text" class="cajaMinima" id="utilidad" size="10"
-                                    maxlength="10" value="0.00">%
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                Pvp B: &nbsp;&nbsp;&nbsp;<input NAME="pvpb" type="text" class="cajaPequena2" id="pvpb"
+                                                                size="10" maxlength="10"> &#36;
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                Pvp C: &nbsp;&nbsp;&nbsp;<input NAME="pvpc" type="text" class="cajaPequena2" id="pvpc"
+                                                                size="10" maxlength="10"> &#36;
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                Pvp D: &nbsp;&nbsp;&nbsp;<input NAME="pvpd" type="text" class="cajaPequena2" id="pvpd"
+                                                                size="10" maxlength="10"> &#36;
+
                             </td>
                             <td>
                                 Iva
@@ -656,50 +706,64 @@ $obligatorio_serie = 1;
                                      onMouseOver="style.cursor=cursor" title="Agregar articulo"></td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                Serie Obligatorio
-                                <?php  if ($obligatorio_serie == 0) { ?>
-                                    <input type="radio" name="obligatorio" value="0" checked> NO
-                                <?php  } else { ?>
-                                    <input type="radio" name="obligatorio" value="1" checked> SI
-                                <?php  } ?>
-                            </td>
 
-                        </tr>
-                        <tr>
-                            <td>
-                                SERIES:
-                                <input id="serieaux" name="serieaux" type="text" class="cajaGrande1"/>
-                                <input type="button" onclick="AddItem()" value="Agregar Serie"/>
-                                <br/><br/>
-                                <select name="series[]" id="series" size="8" style="width: 100%" multiple="multiple">
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="button" onclick="DeleteItem()" value="Quitar Serie"/>
-                            </td>
+                        <?php if ($obligatorio_serie == 1) { ?>
+                            <tr>
+                                <td>
+                                    Serie Obligatorio
+                                    <?php if ($obligatorio_serie == 2) { ?>
+                                        <input type="radio" name="obligatorio" value="2" checked> NO
+                                    <?php } else { ?>
+                                        <input type="radio" name="obligatorio" value="1" checked> SI
+                                    <?php } ?>
+                                </td>
 
+                            </tr>
+                            <tr>
+                                <td>
+                                    SERIES:
+                                    <input id="serieaux" name="serieaux" type="text" class="cajaGrande1"/>
+                                    <input type="button" onclick="AddItem()" value="Agregar Serie"/>
+                                    <br/><br/>
+                                    <select name="series[]" id="series" size="8" style="width: 100%"
+                                            multiple="multiple">
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" onclick="DeleteItem()" value="Quitar Serie" />
+                                </td>
+
+                            </tr>
+                        <?php } ?>
+
+                        <tr>
+                            <td>
+                                Utilidad: <input
+                                    NAME="utilidad" type="text" class="cajaMinima" id="utilidad" size="10"
+                                    maxlength="10" value="0.00">%   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                BARRA CODIGOS:
+                           <input type="text" name="lector" id="lector" onclick="limpiarLector()" onkeypress="handleKeyPress(event)" class="cajaGrande1"></td>
                         </tr>
                     </table>
             </div>
-            <input name="idarticulo" value="<?php  echo $idarticulo ?>" type="hidden" id="idarticulo">
-            <!-- <input name="costo" value="<?php  //echo $costo?>" type="hidden" id="costo">-->
+            <input name="idarticulo" value="<?php echo $idarticulo ?>" type="hidden" id="idarticulo">
+            <!-- <input name="costo" value="<?php //echo $costo?>" type="hidden" id="costo">-->
             <br>
             <div id="frmBusqueda">
                 <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
                     <tr class="cabeceraTabla">
 
                         <td width="5%">CODIGO</td>
-                        <td width="41%">DESCRIPCION</td>
+                        <td width="35%">DESCRIPCION</td>
+                        <td width="10%">COD BARR</td>
                         <td width="8%">Bodega</td>
                         <td width="5%">CANT</td>
-                        <td width="8%">COSTO</td>
-                        <td width="8%">DCTO.</td>
-                        <td width="8%">SUBT.</td>
-                        <td width="8%">IVA</td>
+                        <td width="7%">COSTO</td>
+                        <td width="7%">DCTO.</td>
+                        <td width="7%">SUBT.</td>
+                        <td width="7%">IVA</td>
                         <td width="3%">&nbsp;</td>
                         <td width="3%">&nbsp;</td>
                     </tr>
@@ -744,7 +808,7 @@ $obligatorio_serie = 1;
 
 
                     <tr>
-                        <td class="busqueda" align="right">IVA <?php  echo $ivaporcetaje; ?>%</td>
+                        <td class="busqueda" align="right">IVA <?php echo $ivaporcetaje; ?>%</td>
                         <td align="right">
                             <div align="center">
                                 <input class="cajaTotales" name="iva12" type="text" id="iva12" size="12" align="right"
@@ -793,10 +857,10 @@ $obligatorio_serie = 1;
                                      border="1" onMouseOver="style.cursor=cursor">
                                 <img src="../img/botoncancelar.jpg" width="85" height="22" onClick="cancelar()"
                                      border="1" onMouseOver="style.cursor=cursor">
-                                <!--<input id="codfamilia" name="codfamilia" value="<?php  echo $codfamilia ?>" type="hidden">-->
-                                <input id="codfacturatmp" name="codfacturatmp" value="<?php  echo $codfacturatmp ?>"
+                                <!--<input id="codfamilia" name="codfamilia" value="<?php echo $codfamilia ?>" type="hidden">-->
+                                <input id="codfacturatmp" name="codfacturatmp" value="<?php echo $codfacturatmp ?>"
                                        type="hidden">
-                                <input id="preciototal2" name="preciototal2" value="<?php  echo $preciototal ?>"
+                                <input id="preciototal2" name="preciototal2" value="<?php echo $preciototal ?>"
                                        type="hidden">
                             </div>
                         </div>

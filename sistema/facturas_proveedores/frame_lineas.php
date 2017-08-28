@@ -1,3 +1,4 @@
+
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
@@ -54,7 +55,7 @@
             document.getElementById("frame_datos").src = "eliminar_linea.php?codfacturatmp=" + codfacturatmp + "&numlinea=" + numlinea;
         }
     }
-    function modificar_linea(codfacturatmp, numlinea, importe, iva, descuento, utilidad, idbodega,series) {
+    function modificar_linea(codfacturatmp, numlinea, importe, iva, descuento, utilidad, idbodega, series) {
 
         miPopup = window.open("modificar_linea.php?codfacturatmp=" + codfacturatmp + "&numlinea=" + numlinea + "&importe=" + importe + "&iva=" + iva + "&descuento=" + descuento + "&utilidad=" + utilidad + "&idbodega=" + idbodega + "&series=" + series, "miwin", "width=600,height=600,scrollbars=yes");
         miPopup.focus();
@@ -110,10 +111,16 @@
 </script>
 <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 <body>
-<?php 
+<?php
 include("../conexion/conexion.php");
 $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
+
+//SERIE OBLIGATORIO***************************************************
+$sel_obli = "select serie_unica FROM param_item where  borrado=0";
+$rs_obli = mysql_query($sel_obli, $conn);
+$obligatorio_serie = mysql_result($rs_obli, 0, "serie_unica");
+
 
 error_reporting(0);
 $codfacturatmp = $_POST["codfacturatmp"];
@@ -132,22 +139,32 @@ if ($retorno == 0) {
     $descuento = $_POST["descuento"];
     $iva = $_POST["iva"];
     $pvp = $_POST["pvp"];
+    $pvpb = $_POST["pvpb"];
+    $pvpc = $_POST["pvpc"];
+    $pvpd = $_POST["pvpd"];
     $utilidad = $_POST["utilidad"];
     $bodega = $_POST["cbobodega"];
 
+    $lector = $_POST["lector"];
+
+
     // MANEJO DE SERIES ***********************************************************************************
-    $series = $_POST["series"];
     $series_string = "";
-    $num_series = sizeof($series);
-    $cont =0;
-    while($cont < $num_series){
-        if($cont == ($num_series -1)){
-            $series_string = $series_string . utf8_encode($series[$cont]);
-        }else{
-            $series_string = $series_string . utf8_encode($series[$cont]) . "----";
+    if ($obligatorio_serie == 1) {
+        $series = $_POST["series"];
+
+        $num_series = sizeof($series);
+        $cont = 0;
+        while ($cont < $num_series) {
+            if ($cont == ($num_series - 1)) {
+                $series_string = $series_string . utf8_encode($series[$cont]);
+            } else {
+                $series_string = $series_string . utf8_encode($series[$cont]) . "----";
+            }
+            $cont++;
         }
-        $cont++;
     }
+
     //*******************************************************************************************************
 
     /*foreach ($series as $s) {
@@ -155,8 +172,8 @@ if ($retorno == 0) {
     }*/
 
 
-    $sel_insert = "INSERT INTO factulineaptmp (codfactura,numlinea,id_articulo,cantidad,costo,importe,dcto,iva,pvp,utilidad,id_bodega, series) 
-                    VALUES ('$codfacturatmp',null,'$idarticulo','$cantidad','$precio','$importe','$descuento','$iva','$pvp','$utilidad','$bodega','$series_string')";
+    $sel_insert = "INSERT INTO factulineaptmp (codfactura,numlinea,id_articulo,cantidad,costo,importe,dcto,iva,pvp,utilidad,id_bodega, series, lector, pvpb,pvpc,pvpd) 
+                    VALUES ('$codfacturatmp',null,'$idarticulo','$cantidad','$precio','$importe','$descuento','$iva','$pvp','$utilidad','$bodega','$series_string', '$lector','$pvpb','$pvpc','$pvpd')";
     $rs_insert = mysql_query($sel_insert, $conn);
 
 
@@ -165,9 +182,10 @@ if ($retorno == 0) {
 //}
 ?>
 <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
-    <?php 
+    <?php
     $sel_lineas = "SELECT b.codigo as codigo, b.nombre as nombre, a.numlinea as numlinea, a.cantidad as cantidad, a.costo as costo, 
-					a.importe as importe, a.dcto as dcto, a.iva as iva, a.utilidad as utilidad, a.id_bodega as idbodega, a.series as series 
+					a.importe as importe, a.dcto as dcto, a.iva as iva, a.utilidad as utilidad, a.id_bodega as idbodega, a.series as series, 
+					a.lector as lector, a.pvp as pvp, a.pvpb as pvpb, a.pvpc as pvpc, a.pvpd as pvpd
 			FROM factulineaptmp a INNER JOIN producto b ON a.id_articulo=b.id_producto 
 			WHERE a.codfactura = $codfacturatmp ORDER BY a.numlinea ASC";
     $rs_lineas = mysql_query($sel_lineas, $conn);
@@ -185,10 +203,17 @@ if ($retorno == 0) {
         $utilidad = mysql_result($rs_lineas, $i, "utilidad");
         $idbodega = mysql_result($rs_lineas, $i, "idbodega");
         $seriestemp = (mysql_result($rs_lineas, $i, "series"));
+        $lector = (mysql_result($rs_lineas, $i, "lector"));
+        $pvp = (mysql_result($rs_lineas, $i, "pvp"));
+        $pvpb = (mysql_result($rs_lineas, $i, "pvpb"));
+        $pvpc = (mysql_result($rs_lineas, $i, "pvpc"));
+        $pvpd = (mysql_result($rs_lineas, $i, "pvpd"));
 
         $queryb = "SELECT nombre FROM bodega WHERE id_bodega = '$idbodega'";
         $resb = mysql_query($queryb, $conn);
         $nombod = mysql_result($resb, 0, "nombre");
+
+
 
 
         if ($i % 2) {
@@ -196,24 +221,29 @@ if ($retorno == 0) {
         } else {
             $fondolinea = "itemImparTabla";
         } ?>
-        <tr class="<?php  echo $fondolinea ?>">
+        <tr class="<?php echo $fondolinea ?>">
 
-            <td width="5%"><?php  echo $seriestemp ?></td>
-            <td width="41%" align="center"><?php  echo $descripcion ?></td>
-            <td width="8%"><?php  echo $nombod ?></td>
-            <td width="5%" align="center"><?php  echo $cantidad ?></td>
-            <td width="8%" align="center"><?php  echo $precio ?></td>
-            <td width="8%" align="center"><?php  echo $descuento ?></td>
-            <td width="8%" align="center"><?php  echo $importe ?></td>
-            <td width="8%" align="center"><?php  echo $iva ?></td>
+            <?php if ($obligatorio_serie == 1) { ?>
+                <td width="5%"><?php echo $seriestemp ?></td>
+            <?php } else { ?>
+                <td width="5%"><?php echo $codarticulo ?></td>
+            <?php } ?>
+            <td width="35%" align="center"><?php echo $descripcion ?></td>
+            <td width="10%"><?php echo $lector ?></td>
+            <td width="8%"><?php echo $nombod ?></td>
+            <td width="5%" align="center"><?php echo $cantidad ?></td>
+            <td width="7%" align="center"><?php echo $precio ?></td>
+            <td width="7%" align="center"><?php echo $descuento ?></td>
+            <td width="7%" align="center"><?php echo $importe ?></td>
+            <td width="7%" align="center"><?php echo $iva ?></td>
             <td width="3%"><a
-                    href="javascript:eliminar_linea(<?php  echo $codfacturatmp ?>,<?php  echo $numlinea ?>,<?php  echo $importe ?>,<?php  echo $iva ?>,<?php  echo $descuento ?>)"><img
+                    href="javascript:eliminar_linea(<?php echo $codfacturatmp;?>,<?php echo $numlinea;?>,<?php echo $importe;?>,<?php echo $iva;?>,<?php echo $descuento;?>)"><img
                         src="../img/eliminar.png" border="0"></a></td>
             <td width="3%"><a
-                    href="javascript:modificar_linea(<?php  echo $codfacturatmp ?>,<?php  echo $numlinea ?>,<?php  echo $importe ?>,<?php  echo $iva ?>,<?php  echo $descuento ?>, <?php  echo $utilidad ?>, <?php  echo $idbodega ?>, '<?php  echo $seriestemp ?>')"><img
+                    href="javascript:modificar_linea(<?php echo $codfacturatmp;?>,<?php echo $numlinea;?>,<?php echo $importe;?>,<?php echo $iva;?>,<?php echo $descuento;?>, <?php echo $utilidad;?>, <?php echo $idbodega;?>, '<?php echo $seriestemp;?>')"><img
                         src="../img/modificar.png" border="0"></a></td>
         </tr>
-    <?php  } ?>
+    <?php } ?>
 </table>
 <iframe id="frame_datos" name="frame_datos" width="0%" height="0" frameborder="0">
     <ilayer width="0" height="0" id="frame_datos" name="frame_datos"></ilayer>

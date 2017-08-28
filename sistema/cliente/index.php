@@ -1,6 +1,14 @@
 <?php
 
-$tiempo_sesion = 60;
+
+//TIEMPO SESSION EN SEGUNDOS*****************************************
+include("../conexion/conexion.php");
+error_reporting(0);
+$db = new ServidorBaseDatos();
+$conn = $db->getConexion();
+$sel_time = "select tiempo FROM tiempo_sesion where  borrado=0 limit 1";
+$rs_time = mysql_query($sel_time, $conn);
+$tiempo_sesion = mysql_result($rs_time, 0, "tiempo");
 
 //iniciamos la sesión
 //session_name("loginUsuario");
@@ -28,7 +36,7 @@ if ($_SESSION["autentificado"] != "SI") {
 		$_SESSION["ultimoAcceso"] = $ahora;
 	}
 }
-
+//**********************************************************************
 ?>
 
 <html>

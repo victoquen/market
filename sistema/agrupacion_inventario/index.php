@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Productos</title>
+		<title>AGRUPACION Productos</title>
 		<link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 		<script language="javascript">
 		

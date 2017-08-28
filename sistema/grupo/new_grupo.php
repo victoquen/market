@@ -35,8 +35,8 @@
                         <form id="formulario" name="formulario" method="post" action="save_grupo.php">
                             <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0>
                                 <tr>
-                                    <td width="15%">Codigo</td>
-                                    <td width="43%"><input NAME="Acodigo" type="text" class="cajaGrande" id="cogigo" size="45" maxlength="45"></td>
+                                    <td width="15%">Codigo (Maximo 6 caracteres)</td>
+                                    <td width="43%"><input NAME="Acodigo" type="text" class="cajaGrande" id="cogigo" size="6" maxlength="6"></td>
                                     <td width="42%" rowspan="8" align="left" valign="top"><ul id="lista-errores"></ul></td>
                                 </tr>
                                 <tr>

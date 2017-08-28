@@ -12,10 +12,10 @@
                 [null, 'Inicio', 'central2.php', 'principal', 'Inicio'],
                 [null, 'Clientes', './cliente/index.php', 'principal', 'Clientes'],
                 [null, 'Proveedores', './proveedor/index.php', 'principal', 'Proveedores'],
-                /*[null, 'Conversion', null, null, 'Conversion',
-                    [null, 'Transformacion', './transformacion_inventario/index.php', 'principal', 'transformacion'],
-                    [null, 'Agrupacion', './agrupacion_inventario/index.php', 'principal', 'agrupacion']
-                ],*/
+                [null, 'Conversion', null, null, 'Conversion',
+                    [null, 'Transformacion', './transformacion_inventario/index.php', 'principal', 'transformacion']
+                    //[null, 'Agrupacion', './agrupacion_inventario/index.php', 'principal', 'agrupacion']
+                ],
                 [null, 'Productos', null, null, 'Productos',					
                     [null, 'Articulos', './producto/index.php', 'principal', 'Productos'],
                     [null, 'Grupos', './grupo/index.php', 'principal', 'Grupos'],
@@ -39,10 +39,11 @@
                     [null, 'Historial Compras', './reporte_historial_compras/index.php', 'principal', 'historial'],
                     [null, 'Reporte Iva 0-12', './reporte_fact_compras_iva0iva12/index.php', 'principal', 'iva']
                 ],
+            /*
 		        [null, 'Proforma', null, null, 'Proforma',
                     [null, 'Proformas Ventas', './proformas_clientes/index.php', 'principal', 'Proformas Clientes']
                 ],
-
+            */
                 [null, 'Gastos', null, null, 'Gastos',
                     [null, 'Cuentas Gastos', './cuentas/index.php', 'principal', 'cuentas'],
                         [null, 'Facturas Gastos', './facturas_gastos/index.php', 'principal', 'Compras Gastos'],
@@ -83,13 +84,17 @@
                     [null, 'RUC', './ruc/index.php', 'principal', 'RUC'],
                     [null, 'Usuarios', './usuario/index.php', 'principal', 'Usuarios'],
                     [null, 'IVA %', './porcentaje_iva/index.php', 'principal', 'IVA %'],
+                    [null, 'ITEMS Factura', './parametros_item/index.php', 'principal', 'ITEMS Factura'],
 					[null, 'Codigos Retencion', './codigos_retencion/index.php', 'principal', 'Retenciones'],
-                    [null, 'Bancos', './bancos/index.php', 'principal', 'bancos'],                    
+                    [null, 'Bancos', './bancos/index.php', 'principal', 'bancos'],
+                    [null, 'Bancos Movimientos', './banco_movimiento/index.php', 'principal', 'banco movimientos'],
                     [null, 'Datos Retencionero', './retencionero/index.php', 'principal', 'retencionero'],
                     [null, 'Datos Guia de remision', './remisionero/index.php', 'principal', 'remisionero'],
                     [null, 'Datos Proformas', './proformero/index.php', 'principal', 'proformero'],
                     [null, 'Formas de Pago', './formas_pago/index.php', 'principal', 'forma de pagos'],
-                    [null, 'Operadoras Moviles', './operadoras/index.php', 'principal', 'operadoras']
+                    [null, 'Operadoras Moviles', './operadoras/index.php', 'principal', 'operadoras'],
+                    [null, '% Tarjeta Credito', './porcentaje_tarjetacredito/index.php', 'principal', 'Tarjeta Crédito'],
+                    [null, '', '', '', '']
                 ],
                 [null, 'Respaldos', null, null, 'Copias de Seguridad',
                     [null, 'Hacer copia', './backup/hacerbak.php', 'principal', 'Hacer copia'],
@@ -143,7 +148,7 @@
         <div align="center" style="background-image:url('img/banner1.jpg'); height: 70px;background-repeat:no-repeat; background-position:right">
             <table width="100%">
                 <tr>
-                    <td width="70%" ><img src="img/electroparc.png" height="70px" width="50%"></td>
+                    <td width="70%"align="center" ><img src="img/electroparc.png" height="70px" width="70px"></td>
                     <td width="20%" ><strong style="color: white">Bienvenido <?php echo $_SESSION['username'] ?> -- <?php echo $_SESSION['ultimoAcceso'];?>.<br/></strong><a style="color:papayawhip " href="../logout.php" id="sessionKiller">Cerrar sesi&oacute;n.</a></td>
                 </tr>
             </table>

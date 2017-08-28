@@ -1,7 +1,7 @@
 <?php 
 include_once '../conexion/conexion.php';
 include_once 'class/proveedor.php';
-
+include("../js/fechas.php");
 $idproveedor = $_REQUEST["idproveedor"];
 
 $usuario = new ServidorBaseDatos();
@@ -9,27 +9,37 @@ $conn = $usuario->getConexion();
 
 $proveedor = new proveedor();
 $row = $proveedor->get_proveedor_id($conn, $idproveedor);
+
+
 ?>
 
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
-        <title>Principal</title>
+        <title>DATOS PROVEEDOR - PRODUCTOS</title>
         <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
 
 
         <!-- INICIO archivos para DATA TABLES-->
-        <style type="text/css" title="currentStyle">
+        <link href="../css/styleDT.css" type="text/css" rel="stylesheet">
+        <link href="../css/style1.css" type="text/css" rel="stylesheet">
 
-            @import "../css/demo_table.css";
-            @import "TableTools-2.0.1/media/css/TableTools.css";
-        </style>
-        <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+        <link href="../css/buttons.dataTables.min.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.css" type="text/css" rel="stylesheet">
+        <link href="../css/dataTables.tableTools.min.css" type="text/css" rel="stylesheet">
 
-        <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+        <script type="text/javascript" language="javascript" src="../js/jqueryComplementos.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jquery.dataTables1.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/dataTables.buttons.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.flash.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/jszip.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/pdfmake.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/vfs_fonts.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.html5.min.js"/>
+        <script type="text/javascript" language="javascript" src="../js/buttons.print.min.js"/>
 
-        <script type="text/javascript" charset="utf-8" src="TableTools-2.0.1/media/js/ZeroClipboard.js"></script>
-        <script type="text/javascript" charset="utf-8" src="TableTools-2.0.1/media/js/TableTools.js"></script>
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.js"></script>
+        <script type="text/javascript" charset="utf-8" src="../js/dataTables.tableTools.min.js"></script>
         <!-- FIN archivos para DATA TABLES-->
 
 
@@ -53,11 +63,16 @@ $row = $proveedor->get_proveedor_id($conn, $idproveedor);
             $(document).ready(function() {
               
                 oTable = $('#example').dataTable( {
-                        
-                        "bProcessing": true,
-                        "bServerSide": true,
+
+                    "processing": true,
+                    "serverSide": true,
+                    "sPaginationType": "full_numbers",
+                    dom: '<"top"lBf>rt<"bottom"ip><"clear">',
+                    buttons: [
+                        'excel', 'pdf', 'print'
+                    ],
                         "sAjaxSource": "processing_producto_proveedor.php?idproveedor=<?php   echo $idproveedor;?>",
-                        "sPaginationType": "full_numbers",
+                       
 
                         
 
@@ -66,21 +81,7 @@ $row = $proveedor->get_proveedor_id($conn, $idproveedor);
                         
 
 
-                       "sDom": 'T<"clear">lfrtip',
-                        "oTableTools": {
-                            "sSwfPath": "TableTools-2.0.1/media/swf/copy_cvs_xls_pdf.swf",
-                            "aButtons": [
-
-                                "xls",
-                                {
-                                        "sExtends": "pdf",
-                                        "sPdfOrientation": "landscape",
-                                        "sPdfMessage": " Agro "
-
-                                },
-                                
-                            ]
-                        },
+                       
                         "oLanguage": {
                             "oPaginate": {
                             "sPrevious": "Anterior",
@@ -92,8 +93,9 @@ $row = $proveedor->get_proveedor_id($conn, $idproveedor);
                             "sLengthMenu": 'Mostrar <select>'+
                             '<option value="5">5</option>'+
                             '<option value="10">10</option>'+
-                            
-                            
+                            '<option value="15">15</option>'+
+                            '<option value="20">25</option>'+
+                            '<option value="-1">Todos</option>'+
                             '</select> registros',
 
                             "sInfo": "Mostrando _START_ a _END_ (de _TOTAL_ resultados)",
@@ -162,6 +164,14 @@ $row = $proveedor->get_proveedor_id($conn, $idproveedor);
                             <tr>
                                 <td width="15%">Lugar/Ciudad</td>
                                 <td width="43%"><?php  echo $row["lugar"] ?></td>
+                            </tr>
+                            <tr>
+                                <td width="15%">Autorización</td>
+                                <td width="43%"><?php  echo $row["autorizacion"] ?></td>
+                            </tr>
+                            <tr>
+                                <td width="15%">Fecha Caducidad</td>
+                                <td width="43%"><?php  echo implota($row['fecha_caducidad']) ?></td>
                             </tr>
                         </table>
 

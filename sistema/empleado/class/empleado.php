@@ -29,7 +29,7 @@ class Empleado
 
     public function delete($conn, $id)
     {
-        $query = "UPDATE empleado SET borrado = 1 WHERE id_empleado='$id'";
+        $query = "UPDATE empleado SET borrado = 1 WHERE id='$id'";
         $result = mysql_query($query, $conn);
         return $result;
     }

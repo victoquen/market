@@ -97,7 +97,7 @@ class Productoserie
                 INNER JOIN productobodega pb ON s.id_productobodega = pb.id_productobodega 
                 INNER JOIN bodega b ON pb.id_bodega = b.id_bodega 
                 INNER JOIN producto p ON pb.id_producto = p.id_producto 
-                WHERE s._productobodega  ='$id_productobodega' AND s.borrado = 0";
+                WHERE s.id_productobodega  ='$id_productobodega' AND s.borrado = 0";
         $result = mysql_query($query, $conn);
 
         while ($row=mysql_fetch_assoc($result))

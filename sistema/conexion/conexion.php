@@ -16,24 +16,26 @@
             $this->base_datos = "ombugame_ideweb";*/
 
 
-           /* $this->server = "localhost";
+            $this->server = "localhost";
             $this->user = "root";
             $this->password = "23142314";
-            $this->base_datos = "ideweb";*/
+            $this->base_datos = "market";
 
-            $this->server = "192.168.1.111";
+            /*$this->server = "192.168.1.111";
             $this->user = "root";
             $this->password = "123456";
-            $this->base_datos = "idewebtest";
+            $this->base_datos = "idewebtest";*/
 
             $this->conectar_base_datos();
         }
 
         public function conectar_base_datos()
         {
-            $this->descriptor = mysql_connect($this->server, $this->user, $this->password);
+            
+            $this->descriptor = mysql_connect($this->server, $this->user, $this->password) or die ("<div style='color:red;'><h3>Could not connect to MySQL server</h3></div>");
             mysql_query("SET NAMES 'utf8'");
-            mysql_select_db($this->base_datos);
+
+            mysql_select_db($this->base_datos) or die ("<div style='color:red;'><h3>Could not select the indicated database</h3></div>");
         }
 
         public function getConexion()

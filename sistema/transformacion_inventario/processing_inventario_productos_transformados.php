@@ -4,8 +4,8 @@
 	 */
 
 	/* Array of database columns which should be read and sent back to DataTables */
-	$aColumns = array('id_producto', 'codigo', 'nombre', 'stock','consignacion', 'costo', 'pvp',  'proveedor','grupo','subgrupo','composicion','aplicacion' );
-        $aColumns_Aux=array('a.codigo', 'a.nombre', 'a.stock','a.stock_consignacion', 'a.costo', 'a.pvp', 'a.proveedor','g.nombre','s.nombre','a.composicion','a.aplicacion');
+	$aColumns = array('id_producto', 'codigo', 'nombre', 'stock','consignacion', 'costo', 'pvp',  'proveedor','grupo','subgrupo' );
+        $aColumns_Aux=array('a.codigo', 'a.nombre', 'a.stock','a.stock_consignacion', 'a.costo', 'a.pvp', 'a.proveedor','g.nombre','s.nombre');
 
 
 
@@ -96,8 +96,8 @@
 	$sQuery = "
 		SELECT SQL_CALC_FOUND_ROWS a.id_producto as id_producto, a.codigo as codigo, a.nombre as nombre, a.stock as stock,
                                            a.stock_consignacion as consignacion,
-                                           a.costo as costo, a.pvp as pvp, a.proveedor as proveedor, g.nombre as grupo, s.nombre as subgrupo,
-                                           a.composicion as composicion, a.aplicacion as aplicacion
+                                           a.costo as costo, a.pvp as pvp, a.proveedor as proveedor, g.nombre as grupo, s.nombre as subgrupo
+                                          
 		FROM   producto a INNER JOIN grupo g ON a.grupo=g.id_grupo INNER JOIN subgrupo s ON a.subgrupo=s.id_subgrupo
                 WHERE (a.borrado = 0) AND (transformacion=1) 
                 $sWhere

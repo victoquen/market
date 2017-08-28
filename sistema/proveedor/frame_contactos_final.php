@@ -52,8 +52,8 @@ if ($modif<>1) {
 				
 				
 
-				$sel_insert="INSERT INTO proveedorcontacto (id_contacto,id_proveedor,idcontacto,cargo,nombre,linea,email,0)
-                                            VALUES ('','$idproveedor','$cargo','$nombre_contacto','$linea_contacto','$email_contacto')";
+				$sel_insert="INSERT INTO proveedorcontacto (id_contacto,id_proveedor,cargo,nombre,linea,email,borrado)
+                                            VALUES (null,'$idproveedor','$cargo','$nombre_contacto','$linea_contacto','$email_contacto','0')";
 				$rs_insert=mysql_query($sel_insert, $conn);
 
 		}

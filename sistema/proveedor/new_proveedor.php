@@ -1,5 +1,5 @@
-<?php 
-
+<?php
+include("../js/fechas.php");
 include_once '../conexion/conexion.php';
 include_once 'class/proveedor.php';
 $usuario = new ServidorBaseDatos();
@@ -14,6 +14,17 @@ $sel_prov="INSERT INTO proveedortmp (idproveedor,fecha) VALUE ('','$fechahoy')";
 $rs_prov=mysql_query($sel_prov, $conn);
 $codproveedortmp=mysql_insert_id();
 
+$query_deletetmp="DELETE FROM proveedorfonotmp WHERE idproveedor=$codproveedortmp";
+$re_deletetmp=mysql_query($query_deletetmp,$conn);
+
+$query_deletetmp="DELETE FROM proveedorbancotmp WHERE idproveedor=$codproveedortmp";
+$re_deletetmp=mysql_query($query_deletetmp,$conn);
+
+$query_deletetmp="DELETE FROM proveedorcontactotmp WHERE idproveedor=$codproveedortmp";
+$re_deletetmp=mysql_query($query_deletetmp,$conn);
+
+$query_deletetmp="DELETE FROM proveedorcontactofonotmp WHERE idproveedor=$codproveedortmp";
+$re_deletetmp=mysql_query($query_deletetmp,$conn);
 
 ?>
 
@@ -25,10 +36,30 @@ $codproveedortmp=mysql_insert_id();
         <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
         <title>Principal</title>
         <link href="../estilos/estilos.css" type="text/css" rel="stylesheet">
-       
         <script type="text/javascript" src="../js/validar.js"></script>
-        <script language="javascript">
+        <!-- INICIO ARCHIVOS CALENDARIO -->
+        <link rel="stylesheet" href="../css/jquery-ui.css"/>
+        <link rel="stylesheet" href="../css/jquery-ui.min.css"/>
+        <link rel="stylesheet" href="../css/jquery-ui.structure.css"/>
+        <link rel="stylesheet" href="../css/jquery-ui.structure.min.css"/>
+        <script src="../js/jquery-1.12.4.js"></script>
+        <script src="../js/1.12.1_jquery-ui..js"></script>
 
+        <script language="javascript">
+            $( function() {
+                $( "#fechacaducidad" ).datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    dateFormat: 'dd/mm/yy',
+                    showOn: "button",
+                    buttonImage: "../img/calendario.png",
+                    buttonImageOnly: true,
+                    buttonText: "Seleccionar Fecha"
+                });
+            } );
+        </script>
+        <!-- FIN ARCHIVOS CALENDARIO -->
+        <script language="javascript">
         function cancelar() {
                 location.href="index.php";
         }
@@ -187,6 +218,16 @@ $codproveedortmp=mysql_insert_id();
                                 <tr>
                                     <td width="17%">Lugar/Ciudad</td>
                                     <td width="43%"><input NAME="alugar" id="lugar" type="text" class="cajaGrande" size="35" maxlength="50" ></td>
+                                </tr>
+                                <tr>
+                                    <td width="17%">Autorización:</td>
+                                    <td width="43%"><input NAME="aautorizacion" id="autorizacion" type="text" class="cajaGrande" size="35" maxlength="50" ></td>
+                                </tr>
+                                <tr>
+                                    <td width="15%" align="left">Fecha Caducidad:</td>
+                                    <td width="43%"><input id="fechacaducidad" type="text" class="cajaPequena" NAME="fechacaducidad"
+                                                           value="<?php echo date("d/m/Y") ?>" readonly/></td>
+
                                 </tr>
                             </table>
                     </div>

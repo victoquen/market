@@ -50,28 +50,6 @@ class Facturap
     public function save_factura($conn, $id_proveedor, $codigo_factura,$serie1,$serie2,$autorizacion, $fecha, $descuento,$iva0, $iva12,$iva,$flete,$totalfactura, $credito, $plazo, $tipocomprobante,$retencion,$cuenta)
     {
 
-
-
-       /* $query="INSERT INTO facturasp VALUES (null,'$id_proveedor',
-                                              '$codigo_factura',
-                                              '$serie1',
-                                              '$serie2',
-                                              '$autorizacion',
-                                              '$fecha',
-                                              '$descuento',
-                                              '$iva0',
-                                              '$iva12',
-                                             '$iva',
-                                             '$flete',
-                                             '$totalfactura',
-                                             '$credito',
-                                             '$plazo',
-                                             '$tipocomprobante'
-                                             ,'0',
-                                             '0',
-                                             '$retencion',
-                                             '$cuenta')";*/
-
         $query="INSERT INTO facturasp VALUES (null,'$id_proveedor',
                                               '$codigo_factura',
                                               '$serie1',
@@ -119,7 +97,7 @@ class Facturap
 
     public function get_factura_id($conn, $id)
     {
-        $rows;
+     
         $query="SELECT id_cliente,codigo_factura,serie1,serie2,autorizacion,fecha,descuento,iva0,iva12,iva,flete,totalfactura,credito,plazo,tipocomprobante,retencion
                 FROM facturasp
                 WHERE id_facturap ='$id' AND anulado = 0";
@@ -130,7 +108,7 @@ class Facturap
 
     public function get_factura_borrado_id($conn, $id)
     {
-        $rows;
+
         $query="SELECT id_cliente,codigo_factura,serie1,serie2,autorizacion,fecha,descuento,iva0,iva12,iva,flete,totalfactura,credito,plazo,tipocomprobante,retencion
                 FROM facturasp
                 WHERE id_facturap ='$id' AND anulado = 1";
