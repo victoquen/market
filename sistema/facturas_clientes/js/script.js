@@ -38,8 +38,8 @@ var editingtrid = 0;
 var editingtdcol = 0;
 var inputs = ':checked,:selected,:text,textarea,:hidden';
 
-// enter: 13 guardar item seleccionado
-//tab :    para mandar a buscar al item
+// Q : 81 113  guardar item seleccionado
+//enter : 13   para mandar a buscar al item
 // a: 65 97 cambiar al pvpA
 // b: 66 98 cambiar al pvpB
 // c: 67 99 cambiar al pvpC
@@ -50,7 +50,7 @@ $(document).ready(function () {
     $(document).on("keypress", function (e) {
 
         
-        if (e.which == 13) {
+        if ((e.which == 81)||(e.which == 113)) {
            $("." + savebutton).click();
            document.getElementById("dproducto").focus();
         }else if((e.which == 65)||(e.which == 97)&&(document.getElementById("precio").value != "")){
@@ -259,6 +259,14 @@ function onChangeDescuento() {
 function limpiarTexto(elemento){
     //document.getElementById('dproducto').value = "";
     elemento.value="";
+}
+
+
+function handleKeyPress(e){
+    var key=e.keyCode || e.which;
+    if ((key==13)){
+        ventanaArticulos();
+    }
 }
 
 createInput = function (i, str) {

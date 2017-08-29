@@ -79,6 +79,14 @@ if (($maximo >= $inicio) && ($maximo <= $fin) && ($fechah <= $fechac)) {
 }
 
 
+//CLIENTE POR DEFECTO CONSUMIDOR FINAL 9999999999999
+$sel_cliente = "SELECT * FROM cliente WHERE ci_ruc ='9999999999999'";
+$rs_cliente = mysql_query($sel_cliente, $conn);
+
+$codtipo = mysql_result($rs_cliente, 0, "codigo_tipocliente");
+$sel_tipocliente = "SELECT nombre FROM tipo_cliente WHERE codigo_tipocliente='$codtipo'";
+$rs_tipocliente = mysql_query($sel_tipocliente, $conn);
+
 //AJAX data table edit ********************
 require_once("ajax_table.class.php");
 $obj = new ajax_table();
@@ -185,7 +193,7 @@ $records = array();
 
         function inicio(aceptacion, mensaje) {
             if (aceptacion == 0) {
-                alert(mensaje+ " max: " +<?php echo $idfacturero_seleccionado?>);
+                alert(mensaje + " max: " +<?php echo $idfacturero_seleccionado?>);
                 location.href = "index.php";
             }
         }
@@ -250,8 +258,8 @@ $records = array();
             actualizar_totales();
         }
 
-        function temporal(){
-           
+        function temporal() {
+
         }
     </script>
 </head>
@@ -267,13 +275,15 @@ $records = array();
                         <tr>
                             <td width="6%">Nombre</td>
                             <td width="25%"><input NAME="nombre" type="text" class="cajaGrande" id="nombre" size="45"
-                                                   maxlength="45" onClick="abreVentana()" readonly>
+                                                   maxlength="45" onClick="abreVentana()" readonly
+                                                   value="<?php echo utf8_decode(mysql_result($rs_cliente, 0, "nombre")); ?>">
                                 <img src="../img/ver.png" width="16" height="16" onClick="abreVentana()"
                                      title="Buscar cliente" onMouseOver="style.cursor = cursor">
                             </td>
                             <td width="6%">C&oacute;digo Cliente</td>
                             <td width="20%"><input NAME="codcliente" type="text" class="cajaPequena" id="codcliente"
-                                                   size="6" maxlength="5" onClick="limpiarcaja()" readonly>
+                                                   size="6" maxlength="5"
+                                                   value="<?php echo mysql_result($rs_cliente, 0, "id_cliente"); ?>" readonly>
                             </td>
 
                             <td width="6%"><b>FACTURERO:</b></td>
@@ -308,7 +318,9 @@ $records = array();
 
                             <td>CI/RUC</td>
                             <td colspan="3"><input NAME="ci_ruc" type="text" class="cajaMedia" id="ci_ruc" size="20"
-                                                   maxlength="15" readonly>
+                                                   maxlength="15"
+                                                   value="<?php echo mysql_result($rs_cliente, 0, "ci_ruc"); ?>"
+                                                   readonly>
 
                             </td>
 
@@ -322,7 +334,8 @@ $records = array();
                             <td>Tipo Cliente</td>
                             <td>
                                 <input NAME="tipo_cliente" type="text" class="cajaPequena" id="tipo_cliente" size="20"
-                                       maxlength="15" readonly>
+                                       maxlength="15" value="<?php echo mysql_result($rs_tipocliente, 0, "nombre"); ?>"
+                                       readonly>
                             </td>
                             <td>
                                 Gu&iacute;a Remisi&oacute;n:
@@ -466,10 +479,10 @@ $records = array();
                                     <tr>
                                         <td>
                                             <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
-                                                   id="tipo_precio" value="1" checked>PVP A</br>
+                                                   id="tipo_precio" value="1">PVP A</br>
 
                                             <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"
-                                                   id="tipo_precio" value="2">PVP B</br>
+                                                   id="tipo_precio" value="2" checked>PVP B</br>
                                         </td>
                                         <td>
                                             <input onchange="onChangeDescuento()" type="radio" name="tipo_precio"

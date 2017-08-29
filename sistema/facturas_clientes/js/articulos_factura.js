@@ -34,12 +34,7 @@ function ventanaArticulos() {
 
 }
 
-function handleKeyPress(e){
-    var key=e.keyCode || e.which;
-    if ((key==9)){
-        ventanaArticulos();
-    }
-}
+
 
 
 function actualizar_importe_individual(cant, pvp) {
