@@ -1,9 +1,15 @@
 ﻿<?php
-//error_reporting(0);
+error_reporting(0);
 include("../js/fechas.php");
 include("../conexion/conexion.php");
 $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
+
+
+//get datos SESSION****************************************************
+session_start();
+$tipo = $_SESSION['tipo'];
+//*********************************************************************
 
 
 //SERIE OBLIGATORIO***************************************************
@@ -109,7 +115,7 @@ if ($accion == "alta") {
         $validacion = 0;
     }
     //$pasar_ids = implode(",", $idfact_array);
-    $pasar_ids=$idfact_array;
+    $pasar_ids = $idfact_array;
 
 
     $contador = 0;
@@ -280,15 +286,22 @@ if ($accion == "alta") {
         $contador++;
     }
 
+    //$string_ids="";
+    $cont_ids = count($pasar_ids);
+
+    $encode_ids = json_encode($pasar_ids);
 
 
+    echo "
+        <script language='javascript'>
 
+            var ajax_url = 'http://127.0.0.1:9876/printFactura*'+$encode_ids;
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.open( 'GET', ajax_url, true );
+            ajax_request.send();                   
+        </script>
+        ";
 
-    echo "<script>";
-    echo " window.open('../imprimir/imprimir_factura_venta.php?idfactura=' +".json_encode($pasar_ids).");";
-    echo "alert(" . json_encode($pasar_ids) . " );";
-    echo "</script>";
-    
 
     $cabecera1 = "Inicio >> Ventas &gt;&gt; Nueva Factura ";
     $cabecera2 = "INSERTAR FACTURA ";
@@ -570,8 +583,14 @@ if ($accion == "modificar") {
                 history.back();
         }
 
-        function imprimir(idfactura) {
-            window.open("../imprimir/imprimir_factura_venta.php?idfactura=" + idfactura);
+        function imprimir(encode_ids) {
+
+            var ajax_url = 'http://127.0.0.1:9876/printFactura*'+encode_ids;
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.open( 'GET', ajax_url, true );
+            ajax_request.send();
+
+            
         }
 
 
@@ -702,50 +721,54 @@ if ($accion == "modificar") {
 
 
                 </table>
-                <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
-                    <tr class="cabeceraTabla">
 
-                        <td width="16%">CODIGO</td>
-                        <td width="36%">DESCRIPCION</td>
-                        <td width="5%">CANT.</td>
-                        <td width="8%">PRECIO</td>
-                        <td width="8%">*</td>
-                        <td width="8%">DCTO</td>
-                        <td width="8%">IVA</td>
-                        <td width="8">SUBT</td>
-                    </tr>
-                </table>
-                <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
+                <?php if ($tipo == "administrador") { ?>
 
-                    <?php //$sel_lineas="SELECT factulinea.*,articulos.*,familias.nombre as nombrefamilia FROM factulinea,articulos,familias WHERE factulinea.codfactura='$codfactura' AND factulinea.codigo=articulos.codarticulo AND factulinea.codfamilia=articulos.codfamilia AND articulos.codfamilia=familias.codfamilia ORDER BY factulinea.numlinea ASC";
-                    $sel_lineas = "SELECT b.codigo as codigo, b.nombre as nombre, a.cantidad as cantidad, a.precio as precio, a.subtotal as subtotal, a.dcto as dcto, a.iva as iva FROM factulinea a INNER JOIN producto b ON a.id_producto=b.id_producto WHERE a.id_factura = '$idfactura'";
-                    $rs_lineas = mysql_query($sel_lineas, $conn);
-                    for ($i = 0; $i < mysql_num_rows($rs_lineas); $i++) {
-                        $codarticulo = mysql_result($rs_lineas, $i, "codigo");
-                        $descripcion = utf8_decode(mysql_result($rs_lineas, $i, "nombre"));
-                        $cantidad = mysql_result($rs_lineas, $i, "cantidad");
-                        $precio = mysql_result($rs_lineas, $i, "precio");
-                        $subtotal = mysql_result($rs_lineas, $i, "subtotal");
-                        $descuento_ind = mysql_result($rs_lineas, $i, "dcto");
-                        $iva = mysql_result($rs_lineas, $i, "iva");
-                        if ($i % 2) {
-                            $fondolinea = "itemParTabla";
-                        } else {
-                            $fondolinea = "itemImparTabla";
-                        } ?>
-                        <tr class="<?php echo $fondolinea ?>">
+                    <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
+                        <tr class="cabeceraTabla">
 
-                            <td width="16%"><?php echo $codarticulo ?></td>
-                            <td width="36%"><?php echo $descripcion ?></td>
-                            <td width="5%"><?php echo $cantidad ?></td>
-                            <td width="8%" align="center"><?php echo $precio ?></td>
-                            <td width="8%" align="center"><?php echo $subtotal ?></td>
-                            <td width="8%" align="center"><?php echo $descuento_ind ?></td>
-                            <td width="8%" align="center"><?php echo $iva ?></td>
-                            <td width="8%" align="center"><?php echo(($subtotal - $descuento_ind) + $iva) ?></td>
+                            <td width="16%">CODIGO</td>
+                            <td width="36%">DESCRIPCION</td>
+                            <td width="5%">CANT.</td>
+                            <td width="8%">PRECIO</td>
+                            <td width="8%">*</td>
+                            <td width="8%">DCTO</td>
+                            <td width="8%">IVA</td>
+                            <td width="8">SUBT</td>
                         </tr>
-                    <?php } ?>
-                </table>
+                    </table>
+                    <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0 ID="Table1">
+
+                        <?php //$sel_lineas="SELECT factulinea.*,articulos.*,familias.nombre as nombrefamilia FROM factulinea,articulos,familias WHERE factulinea.codfactura='$codfactura' AND factulinea.codigo=articulos.codarticulo AND factulinea.codfamilia=articulos.codfamilia AND articulos.codfamilia=familias.codfamilia ORDER BY factulinea.numlinea ASC";
+                        $sel_lineas = "SELECT b.codigo as codigo, b.nombre as nombre, a.cantidad as cantidad, a.precio as precio, a.subtotal as subtotal, a.dcto as dcto, a.iva as iva FROM factulinea a INNER JOIN producto b ON a.id_producto=b.id_producto WHERE a.id_factura = '$idfactura'";
+                        $rs_lineas = mysql_query($sel_lineas, $conn);
+                        for ($i = 0; $i < mysql_num_rows($rs_lineas); $i++) {
+                            $codarticulo = mysql_result($rs_lineas, $i, "codigo");
+                            $descripcion = utf8_decode(mysql_result($rs_lineas, $i, "nombre"));
+                            $cantidad = mysql_result($rs_lineas, $i, "cantidad");
+                            $precio = mysql_result($rs_lineas, $i, "precio");
+                            $subtotal = mysql_result($rs_lineas, $i, "subtotal");
+                            $descuento_ind = mysql_result($rs_lineas, $i, "dcto");
+                            $iva = mysql_result($rs_lineas, $i, "iva");
+                            if ($i % 2) {
+                                $fondolinea = "itemParTabla";
+                            } else {
+                                $fondolinea = "itemImparTabla";
+                            } ?>
+                            <tr class="<?php echo $fondolinea ?>">
+
+                                <td width="16%"><?php echo $codarticulo ?></td>
+                                <td width="36%"><?php echo $descripcion ?></td>
+                                <td width="5%"><?php echo $cantidad ?></td>
+                                <td width="8%" align="center"><?php echo $precio ?></td>
+                                <td width="8%" align="center"><?php echo $subtotal ?></td>
+                                <td width="8%" align="center"><?php echo $descuento_ind ?></td>
+                                <td width="8%" align="center"><?php echo $iva ?></td>
+                                <td width="8%" align="center"><?php echo(($subtotal - $descuento_ind) + $iva) ?></td>
+                            </tr>
+                        <?php } ?>
+                    </table>
+                <?php } ?>
             </div>
 
             <div id="frmBusqueda">
@@ -803,7 +826,7 @@ if ($accion == "modificar") {
                          onClick="aceptar(<?php echo $validacion ?>,'<?php echo $accion ?>',<?php echo $idfactura ?>)"
                          border="1" onMouseOver="style.cursor=cursor">
                     <img src="../img/botonimprimir.jpg" width="79" height="22" border="1"
-                         onClick="imprimir(<?php echo json_encode($pasar_ids) ?>)" onMouseOver="style.cursor=cursor">
+                         onClick="imprimir(<?php echo $encode_ids ?>)" onMouseOver="style.cursor=cursor">
                 </div>
             </div>
 
@@ -814,8 +837,12 @@ if ($accion == "modificar") {
             <br/>
             <br/>
 
+
             <!-- INICIO COBROS --------------------------------------->
+
+
             <div id="frmBusqueda">
+                <?php if ($tipo == "administrador"){ ?>
                 <form id="formulario" name="formulario" method="post" action="frame_cobros.php" target="frame_cobros">
                     <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0>
 
@@ -941,8 +968,51 @@ if ($accion == "modificar") {
                         </tr>
 
                     </table>
+                    <?php }else{ ?>
 
+                    <table class="fuente8" width="98%" cellspacing=0 cellpadding=3 border=0>
+
+                        <tr>
+                            <td width="11%">Total Factura</td>
+                            <td><input type="text" id="Rtotal_factura" name="Rtotal_factura" class="cajaPequena"
+                                       style="text-align: right; background-color: yellow" disabled="true"
+                                       value="<?php echo $totalfactura ?>"/> &#36;</td>
+                        </tr>
+                        <tr>
+                            <td>- Ret. Iva</td>
+                            <td>-<input type="text" id="ret_iva" name="ret_iva" readonly="true" class="cajaPequena"
+                                        style="text-align: right; background-color: lightpink"
+                                        value="<?php echo $ret_iva ?>"/> &#36;</td>
+                        </tr>
+                        <tr>
+                            <td>- Ret. Fuente</td>
+                            <td>-<input type="text" id="ret_fuente" name="Rret_fuente" class="cajaPequena"
+                                        readonly="true" style="text-align: right; background-color: lightpink"
+                                        value="<?php echo $ret_fuente ?>"/> &#36;</td>
+                        </tr>
+                        <tr>
+                            <td width="17%"><span style="font: bold; font-size: 10px">TOTAL A COBRAR</span></td>
+                            <td><input id="Rimporte" type="text" class="cajaPequenaCobros" NAME="Rimporte"
+                                       maxlength="12" onchange="calcular_cambio()" style="text-align: right;"
+                                       value="<?php echo($totalfactura - $ret_iva - $ret_fuente) ?>"><span
+                                    style="font: bold; font-size: 14px"> &#36;</span></td>
+                        </tr>
+                        <tr>
+                            <td width="15%"><span style="font: bold; font-size: 10px">VALOR RECIBIDO</span></td>
+                            <td><input id="billete" type="text" class="cajaPequenaCobros" NAME="billete" maxlength="12"
+                                       onchange="calcular_cambio()" style="text-align: right"><span
+                                    style="font: bold; font-size: 14px"> &#36;</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font: bolder; font-size: 10px">VUELTO A ENTREGAR</span></td>
+                            <td><input id="cambio" type="text" NAME="cambio" maxlength="12" readonly="yes"
+                                       class="cajaPequenaCobros" value="0" style="text-align: right;"><span
+                                    style="font: bold; font-size: 14px"> &#36;</span></td>
+                        </tr>
+                    </table>
+                    <?php } ?>
             </div>
+
             <input type="hidden" name="id" id="id">
             <input type="hidden" name="accion" id="accion" value="insertar">
             <input type="hidden" name="idcliente" id="codcliente" value="<?php echo $idcliente ?>">
@@ -950,6 +1020,7 @@ if ($accion == "modificar") {
 
             </form>
             <br>
+            <?php if ($tipo == "administrador"){ ?>
             <div id="frmBusqueda">
                 <div id="tituloForm" class="header">RELACION DE COBROS</div>
                 <div id="frmResultado2">
@@ -975,6 +1046,7 @@ if ($accion == "modificar") {
                     </iframe>
                 </div>
             </div>
+            <?php }?>
             <!-- FIN COBROS --------------------------------------->
 
 

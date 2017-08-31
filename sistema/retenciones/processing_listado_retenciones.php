@@ -4,7 +4,7 @@
 	 */         
 	/* Array of database columns which should be read and sent back to DataTables */
 	$aColumns = array('id_retencion', 'codigo_retencion','fecha','proveedor','facturap', 'totalretencion' );
-        $aColumnsAux=array('r.codigo_retencion', 'r.fecha', 'p.empresa','f.codigo_factura', 'r.totalretencion');
+        $aColumnsAux=array('r.id_retencion','r.codigo_retencion', 'r.fecha', 'p.empresa','f.codigo_factura', 'r.totalretencion');
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "id_retencion";
 
@@ -111,7 +111,8 @@
 		{
 			if ( $aColumns[$i] == "id_retencion" )
 			{
-                           $code_aux= $aRow[ $aColumns[$i] ]; 
+                           $code_aux= $aRow[ $aColumns[$i] ];
+				$sOutput .= '"'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'",';
 				/* Special output formatting for 'version' */
 				//$sOutput .= ($aRow[ $aColumns[$i] ]=="id_facturaventa") ?
 					//'"-",' :

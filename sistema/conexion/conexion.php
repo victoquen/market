@@ -16,15 +16,15 @@
             $this->base_datos = "ombugame_ideweb";*/
 
 
-            $this->server = "localhost";
+            /*$this->server = "localhost";
             $this->user = "root";
             $this->password = "23142314";
-            $this->base_datos = "market";
+            $this->base_datos = "market";*/
 
-            /*$this->server = "192.168.1.111";
+            $this->server = "192.168.1.147";
             $this->user = "root";
             $this->password = "123456";
-            $this->base_datos = "idewebtest";*/
+            $this->base_datos = "market";
 
             $this->conectar_base_datos();
         }

@@ -63,7 +63,10 @@ $idfacturero = mysql_result($rs_query, 0, "id_facturero");
             }
 
             function imprimir(idfactura) {
-            window.open("../imprimir/imprimir_factura_venta.php?idfactura=" + idfactura);
+                var ajax_url = 'http://127.0.0.1:9876/printFactura*'+idfactura;
+                var ajax_request = new XMLHttpRequest();
+                ajax_request.open( 'GET', ajax_url, true );
+                ajax_request.send();
             }
 
         </script>

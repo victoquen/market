@@ -170,7 +170,7 @@ $rs_pagos = mysql_query($sel_pagos, $conn);
                 buttons: [
                     'excel', 'pdf', 'print'
                 ],
-                "sAjaxSource": "processing_listado_facturas.php?id_facturero=<?php echo $id_facturero;?>",
+                "sAjaxSource": "processing_listado_facturas.php?id_facturero=<?php echo $id_facturero;?>&fecha_inicio=<?php echo $fechainicio?>",
 
                 "aaSorting": [[ 0, "desc" ]],
 

@@ -135,7 +135,7 @@ $records = array();
         localStorage.setItem('iva_porcentaje',<?php echo $ivaporcetaje;?>);
 
         localStorage.setItem('descuento', '1');
-        localStorage.setItem('descuento', '1');
+        localStorage.setItem('descuento', '2');
         localStorage.setItem('itemstotal', <?php echo $totalitems;?>);
         localStorage.setItem('totalrecord', '0');
 

@@ -4,7 +4,7 @@ include_once '../conexion/conexion.php';
 $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
 
-//error_reporting(0);
+error_reporting(0);
 
 $accion = $_REQUEST["accion"];
 if (!isset($accion)) {

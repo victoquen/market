@@ -17,7 +17,7 @@ $usuario = new ServidorBaseDatos();
 $conn = $usuario->getConexion();
 
 $id_facturero = $_REQUEST["id_facturero"];
-
+$fechainicio = $_REQUEST["fecha_inicio"];
 /*
  * Paging
  */
@@ -69,7 +69,7 @@ $sQuery = "
             a.fecha as fecha, a.estado as estado, a.ret_iva as retiva, a.ret_fuente as retfuente, CONCAT( f.serie1,  '-', f.serie2 ) AS leyendafacturero
             FROM   facturas a INNER JOIN cliente b ON a.id_cliente=b.id_cliente 
             INNER JOIN facturero f ON a.id_facturero = f.id_facturero
-            WHERE (a.anulado = 0)AND(a.id_facturero = '$id_facturero')
+            WHERE (a.anulado = 0)AND(a.id_facturero = '$id_facturero') AND (a.fecha = '$fechainicio')
 		) R
 		
                 $sWhere
